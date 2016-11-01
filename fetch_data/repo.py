@@ -41,14 +41,19 @@ class repo:
         cursor.close()
     
     # 获取股票的成交数量
-    # @param startDate dateTime 从哪一天开始
-    # @param endDate dateTime 到哪一天结束
+    # @param startDate dateTime 从哪一天开始(较大的天数，包含)
+    # @param endDate dateTime 到哪一天结束(较小的天数，不包含)
     # @param startTime time 每一天中的开始时间(包含这一刻)
     # @param endTime time 每一天中的结束时间(不包含这一刻)
-    # @return [[amount1, amount2, ..., amountn]
-    #          [amount1, amount2, ..., amountn]
+    # @return [[amount1, amount2, ..., amountn],
+    #          [amount1, amount2, ..., amountn],
     #          ...                             
     #         ]
+    # For Example
+    # startDate = 10.5 endDate = 10.2 startTime = 13:00 endTime = 15:00
+    # return [[10.5 13:00 amount, 10.5 13:01 amount, 10.5 13:02 amount, ..., 10.5 14:59 amount],
+    #         [10.4 13:00 amount, 10.4 13:01 amount, 10.4 13:02 amount, ..., 10.4 14:59 amount],
+    #         [10.3 13:00 amount, 10.3 13:01 amount, 10.3 13:02 amount, ..., 10.3 14:59 amount]]
     def get_amount(self, startDate, endDate, startTime, endTime):
         
 
