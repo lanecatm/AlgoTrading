@@ -13,6 +13,11 @@ from clientOrder import clientOrder
 from datetime import datetime
 import sqlite3
 
+
+
+dbfile = 'test1.db'
+
+
 @click.group()
 def cli():
 	pass
@@ -49,17 +54,24 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 	# order = clientOrder(buysell, stockid, start_t, end_t, amount, alg)
 
 	# store into database
-	conn = sqlite3.connect(test.db)
+	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
-	cursor.execute('create table orders (id text primary key, buysell text, stockid text, start text, end text, amount int, alg text)')
-	orderid = cursor.rowcount + 1
-	cursor.execute('insert into orders (id, buysell, stockid, start, end, amount, alg) values (?,?,?,?,?,?,?)',(str(orderid), buysell, stockid, str(start_t), str(end_t), str(amount), alg))
-	print cursor.rowcount
 	
+	# Create table, only at 1st time runned. 
+	#cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text)')
+	
+	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg) values (?,?,?,?,?,?)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
+	# print cursor.lastrowid
+	
+	# cursor.execute('select * from orders')
+	# values = cursor.fetchall()
+	# print values
 
+	cursor.close()
+	conn.commit()
+	conn.close()
 
-
-	# click.echo(order.action+' '+order.stockAmount+' share of ['+order.stockId+'] during '+str(order.startTime)+' to '+str(order.endTime)+' using '+order.algChoice+' algorithm')
+	click.echo(buysell+' '+str(amount)+' share of ['+stockid+'] during '+str(start_t)+' to '+str(end_t)+' using '+alg+' algorithm')
 	
 @click.command()
 @click.option('--orderid', help='The ID of the order you want to show')
@@ -75,6 +87,15 @@ def showorder(orderid, stockid):
 		else:
 			print 'Retrieving all orders...'
 			# print all
+			conn = sqlite3.connect(dbfile)
+			cursor = conn.cursor()
+			cursor.execute('select * from orders')
+			values = cursor.fetchall()
+			print '   B/S   Stock  Amt       Start Time             End Time        Alg.'
+			for row in values:
+				print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]
+			cursor.close()
+			conn.close()
 	pass
 
 @click.command()
