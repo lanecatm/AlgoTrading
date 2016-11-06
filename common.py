@@ -9,19 +9,22 @@
 ID = 10000
 
 class clientOrder:
-    def __init__(self):
+    # 初始化 client(sorderID, stockID, startTime, endTime, stockAmount,
+                 #quantAnalysisAlgChoice, tradingAlgChoice, trading)
+    def __init__(self, *args):
         # 默认参数
-        global ID
-        ID = ID + 1
-        orderID = ID + 1
-        stockID = 601006
-        startTime = 2016-11-05
-        endTime = 2016-11-06
-        stockAmount = 1000
-        quantAnalysisAlgChoice = True
-        tradingAlgChoice = 'TWAP'
+        if len(args) != 8:
+            return None
+        self.orderID = args[0]
+        self.stockID = args[1]
+        self.startTime = args[2]
+        self.endTime = args[3]
+        self.stockAmount = args[4]
+        self.quantAnalysisAlgChoice = args[5]
+        self.tradingAlgChoice = args[6]
         # 买或卖
-        tradingType = True
+        self.tradingType = args[7]
+
     def setOrderID(self, orderID):
         self.orderID = orderID
     def setStockID(self, stockID):
@@ -41,11 +44,17 @@ class clientOrder:
 
 
 class orderResult:
-    def __init__(self):
-        orderID = -1
-        stockID = -1
-        resultList
-    pass
+    # 初始化 orderResult(orderID, stockID)
+    def __init__(self, *args):
+        if len(args) != 2:
+            return None
+        self.orderID = args[0]
+        self.stockID = args[1]
+        resultList = []
+    def setOrderID(self, orderID):
+        self.orderID = orderID
+    def setStockID(self, stockID):
+        self.stockID = stockID
 
 if __name__ == '__main__':
     pass
