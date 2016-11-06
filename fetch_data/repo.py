@@ -1,7 +1,7 @@
 # -*- encoding:utf-8 -*-
 
 # ==============================================================================
-# Filename: Repo.py
+# Filename: repo.py
 # Author: Xiaofu Huang
 # E-mail: lanecatm@sjtu.edu.cn
 # Last modified: 2016-10-26 17:05
@@ -9,6 +9,8 @@
 # ==============================================================================
 
 import sqlite3
+import time
+import numpy as np
 class repo:
     def __init__(self, file_path):
         # here should be abs path when connect db files
@@ -27,6 +29,9 @@ class repo:
         """
         self._connection.close()
 
+
+    # 插入抓到的数据
+    # @param infoArr [x1, x1, ..., x32]
     def insert_data(self, infoArr):
         statement = "INSERT INTO main.history_stock_info VALUES(NULL,"
         for i in range(0, 31):
@@ -36,4 +41,28 @@ class repo:
         cursor = self._connection.execute(statement)
         self._connection.commit()
         cursor.close()
-
+    
+    # 获取股票的成交数量
+    # @param startDate dateTime 从哪一天开始(较大的天数，包含)
+    # @param endDate dateTime 到哪一天结束(较小的天数，不包含)
+    # @param startTime time 每一天中的开始时间(包含这一刻)
+    # @param endTime time 每一天中的结束时间(不包含这一刻)
+    # @return  np.array
+    #          [[amount1, amount2, ..., amountn],
+    #          [amount1, amount2, ..., amountn],
+    #          ...                             
+    #          ]
+    # For Example
+    # startDate = 10.5 endDate = 10.2 startTime = 13:00 endTime = 15:00
+    # return [[10.5 13:00 amount, 10.5 13:01 amount, 10.5 13:02 amount, ..., 10.5 14:59 amount],
+    #         [10.4 13:00 amount, 10.4 13:01 amount, 10.4 13:02 amount, ..., 10.4 14:59 amount],
+    #         [10.3 13:00 amount, 10.3 13:01 amount, 10.3 13:02 amount, ..., 10.3 14:59 amount]]
+    def get_amount(self, startDate, endDate, startTime, endTime):
+        statement = "SELECT SUCCNUM FROM main.history_stock_info WHERE DATETIME(NOWDATE) > DATETIME(\"" + time.strftime("%Y-%m-%d", endDate) +"\") AND DATETIME(NOWDATE) <= DATETIME(\"" + time.strftime("%Y-%m-%d", startDate)\
+                +"\") AND TIME(NOWTIME) < TIME(\"" + time.strftime("%H:%M:%S", endTime) + "\") AND TIME(NOWTIME) >= TIME(\"" + time.strftime("%H:%M:%S", startTime) + "\")"
+        cursor = self._connection.execute(statement)
+        self._connection.commit()
+        data = cursor.fetchall()
+        cursor.close()
+        data = np.array(data)
+        return data
