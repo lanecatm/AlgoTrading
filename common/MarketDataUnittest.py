@@ -15,7 +15,7 @@ sys.path.append("../fetch_data/")
 import getData
 
 if __name__=='__main__':
-    originArr = getData.getData()
+    originArr = getData.get_data()
     marketData = MarketData(originArr)
     print marketData.sellPrice
     print marketData.sellAmount
