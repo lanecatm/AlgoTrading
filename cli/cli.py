@@ -10,6 +10,8 @@
 # ==============================================================================
 
 import click
+import sys
+sys.path.insert(0, '../common/')
 from clientOrder import clientOrder
 from datetime import datetime
 
