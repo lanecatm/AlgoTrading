@@ -11,14 +11,19 @@ import sys
 sys.path.insert(0, '../common/')
 from clientOrder import clientOrder
 from datetime import datetime
+import sqlite3
+
+
+
+dbfile = 'test1.db'
+
 
 @click.group()
 def cli():
 	pass
 
 @click.command()
-@click.option('--username', prompt=True,
-              default=lambda: os.environ.get('USER', ''))
+@click.option('--username', prompt=True, default=lambda: os.environ.get('USER', ''))
 def hello():
 	click.echo('Hello world.')
 
@@ -42,27 +47,67 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 		endtime = '15:00:00'
 	start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
 	end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
-	#print start_t 
-	#print end_t
+	# print start_t 
+	# print end_t
 
 	# store as an object
-	order = clientOrder(buysell, stockid, start_t, end_t, amount, alg)
+	# order = clientOrder(buysell, stockid, start_t, end_t, amount, alg)
 
 	# store into database
-	# TBD
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
+	
+	# Create table, only at 1st time runned. 
+	#cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text)')
+	
+	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg) values (?,?,?,?,?,?)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
+	# print cursor.lastrowid
+	
+	# cursor.execute('select * from orders')
+	# values = cursor.fetchall()
+	# print values
 
-	click.echo(order.action+' '+order.stockAmount+' share of ['+order.stockId+'] during '+str(order.startTime)+' to '+str(order.endTime)+' using '+order.algChoice+' algorithm')
+	cursor.close()
+	conn.commit()
+	conn.close()
+
+	click.echo(buysell+' '+str(amount)+' share of ['+stockid+'] during '+str(start_t)+' to '+str(end_t)+' using '+alg+' algorithm')
 	
 @click.command()
-@click.option('--orderId', help='The ID of the order you want to show')
-@click.option('--stockId', help='The ID of the stock you want to show')
-def showorder():
+@click.option('--orderid', help='The ID of the order you want to show')
+@click.option('--stockid', help='The ID of the stock you want to show')
+def showorder(orderid, stockid):
+	if orderid != None:
+		print 'Retrieving order No.'+str(orderid)+'...'
+		# get it from DB
+	else: 
+		if stockid != None:
+			print 'Retrieving orders of Stock '+str(stockid)+'...'
+			# get them from DB
+		else:
+			print 'Retrieving all orders...'
+			# print all
+			conn = sqlite3.connect(dbfile)
+			cursor = conn.cursor()
+			cursor.execute('select * from orders')
+			values = cursor.fetchall()
+			print '   B/S   Stock  Amt       Start Time             End Time        Alg.'
+			for row in values:
+				print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]
+			cursor.close()
+			conn.close()
 	pass
 
 @click.command()
-@click.option('--orderId', help='The ID of the order you want to show')
+@click.option('--orderid', prompt=True, help='The ID of the order you want to show')
 @click.confirmation_option(help='Are you sure to place this order?')
-def deleteorder():
+def deleteorder(orderid):
+	# TBD
+	# if : # check id
+	# 	# delete from db
+	# else:
+	# 	print 'Error. No such order named'+str(orderid)
+
 	pass
 
 @click.command()
@@ -71,14 +116,27 @@ def execorder():
 	pass
 
 @click.command()
-@click.option('--orderId', help='The ID of the order you want to show')
-@click.option('--stockId', help='The ID of the stock you want to show')
-def showresult():
-	pass
+@click.option('--orderid', help='The ID of the order you want to show')
+@click.option('--stockid', help='The ID of the stock you want to show')
+def showresult(orderid, stockid):
+	if orderid != None:
+		print 'Retrieving result of order No.'+str(orderid)+'...'
+		# get it from DB
+	else: 
+		if stockid != None:
+			print 'Retrieving results of of Stock '+str(stockid)+'...'
+			# get them from DB
+		else:
+			print 'Retrieving all results...'
+			# print all
 
 
 cli.add_command(hello)
 cli.add_command(placeorder)
+cli.add_command(showorder)
+cli.add_command(deleteorder)
+cli.add_command(execorder)
+cli.add_command(showresult)
 
 if __name__ == "__main__":
 	cli()
