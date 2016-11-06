@@ -1,10 +1,7 @@
-# -*- encoding:utf-8 -*-
-
 # ==============================================================================
 # Filename: cli.py
 # Author: Yi Wei
 # E-mail: weiyi1994@sjtu.edu.cn
-# Last modified: 
 # Description: CLI for this system
 # Prerequisite: Click (Installation: 'sudo pip install click', Ref: http://click.pocoo.org/)
 # ==============================================================================
@@ -51,14 +48,33 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 	# store as an object
 	order = clientOrder(buysell, stockid, start_t, end_t, amount, alg)
 
-	# pass order to algo trading 
-	# TBD
-
 	# store into database
 	# TBD
 
 	click.echo(order.action+' '+order.stockAmount+' share of ['+order.stockId+'] during '+str(order.startTime)+' to '+str(order.endTime)+' using '+order.algChoice+' algorithm')
 	
+@click.command()
+@click.option('--orderId', help='The ID of the order you want to show')
+@click.option('--stockId', help='The ID of the stock you want to show')
+def showorder():
+	pass
+
+@click.command()
+@click.option('--orderId', help='The ID of the order you want to show')
+@click.confirmation_option(help='Are you sure to place this order?')
+def deleteorder():
+	pass
+
+@click.command()
+def execorder():
+	# pass order to AlgoTrading module
+	pass
+
+@click.command()
+@click.option('--orderId', help='The ID of the order you want to show')
+@click.option('--stockId', help='The ID of the stock you want to show')
+def showresult():
+	pass
 
 
 cli.add_command(hello)
