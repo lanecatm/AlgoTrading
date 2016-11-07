@@ -4,6 +4,7 @@
 
 """
 @time: 11/6/16
+@author: Fengjun Chen
 @description: 
 """
 import sys
@@ -13,7 +14,7 @@ import orderResult
 import tradingUnit
 sys.path.append("../quant_analysis")
 import TWAPQuantAnalysis
-#import VWAPQuantAnalysis
+import VWAPQuantAnalysis
 
 
 class algo_trading:
@@ -42,8 +43,8 @@ class algo_trading:
     def GetQuantAnalysisResult(self):
         if self.clientOrder.algChoice == "TWAP":
             quant_analysis = TWAPQuantAnalysis()
-        #elif self.clientOrder.algChoice == "VWAP":
-            #quant_analysis = VWAPQuantAnalysis()
+        elif self.clientOrder.algChoice == "VWAP":
+            quant_analysis = VWAPQuantAnalysis()
         self.quant_result = quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
