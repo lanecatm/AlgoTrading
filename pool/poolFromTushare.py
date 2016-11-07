@@ -11,13 +11,14 @@ import copy
 import sys
 sys.path.append("../common/")
 import MarketData
-import TradingUnit
+from tradingUnit import tradingUnit
 import copy
 
 class poolFromTushare:
-    def __init__(self, marketDataGetter):
+    def __init__(self, marketDataGetter, saveEngine):
         self.historyTradingList = []
         self.marketDataGetter = marketDataGetter
+        self.saveEngine = saveEngine
     
     def getMarketTradingData(self, time):
         #self.marketDataGetter
