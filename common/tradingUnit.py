@@ -10,11 +10,12 @@
 
 class TradingUnit:
     # attribute: buy True, sell False
-    def __init__(self, time, stockId, amount, isSuccess, price, buysell):
+    def __init__(self, orderId, time, stockId, amount, isSuccess, price, buysell):
         self.time == time
         self.stockId = stockId
         self.amount = amount
         self.buysell = buysell
         self.isSuccess = isSuccess
         self.price = price
+        self.orderId = orderId
 
