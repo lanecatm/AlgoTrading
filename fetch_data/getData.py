@@ -14,8 +14,8 @@ def get_data():
     infoArr[-3] = '"' + infoArr[-3] + '"'
     infoArr[-2] = '"' + infoArr[-2] + '"'
 
-    print infoArr
-    return infoArr
+    print infoArr[:-1]
+    return infoArr[:-1]
 
 if __name__=='__main__':
     infoArr = get_data()
