@@ -8,10 +8,10 @@
 # Description: 交易结构体
 # ==============================================================================
 
-class TradingUnit:
+class tradingUnit:
     # attribute: buy True, sell False
-    def __init__(self, orderId, time, stockId, amount, isSuccess, price, buysell):
-        self.time == time
+    def __init__(self, orderId, stockId, buysell, amount, price, isSuccess,time):
+        self.time = time
         self.stockId = stockId
         self.amount = amount
         self.buysell = buysell
