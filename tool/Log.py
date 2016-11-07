@@ -5,7 +5,7 @@ import ErrorCode
 from FileHelper import FileHelper
 
 class Log:
-    def __init__(self, saveInfo = True, saveWarning = True, saveError = True, logDirName = "log"):
+    def __init__(self, isOpen = True, saveInfo = True, saveWarning = True, saveError = True, logDirName = "log"):
         self.saveInfo = saveInfo
         self.saveError = saveError
         self.saveWarning = saveWarning
@@ -25,6 +25,7 @@ class Log:
         self.warningFilename = logDir + "WARNING_" + fileNameStr + "_" + timeStr + ".log"
         self.warningNowName = logDir + "WARNING_" + fileNameStr + ".log"
         self.fileHelper = FileHelper()
+        self.isOpen = isOpen
         return
 
     def __del__(self):
@@ -43,23 +44,32 @@ class Log:
     # @param maeeage string
     # @return None
     def info(self, message=""):
+        if not self.isOpen:
+            return
         outputInfo = "[INFO] " + self.__get_parent_filename() + " " + self.__get_parent_lineno() + ": " + message
         print outputInfo
         self.fileHelper.append(self.infoFilename, outputInfo + "\n", isAbs = True)
+        return
 
     # @param message string
     # @return None
     def warning(self, message=""):
+        if not self.isOpen:
+            return
         outputInfo = "[WARNING] " + self.__get_parent_filename() + " " + self.__get_parent_lineno() + ": " + message
         print outputInfo
         self.fileHelper.append(self.warningFilename, outputInfo + "\n", isAbs = True)
+        return
 
     # @param message string
     # @return None
     def error(self, message=""):
+        if not self.isOpen:
+            return
         outputInfo = "[ERROR] " + self.__get_parent_filename() + " " + self.__get_parent_lineno() + ": " + message
         print outputInfo
         self.fileHelper.append(self.errorFilename, outputInfo + "\n", isAbs = True)
+        return
 
     # @param errorStatus ErrorCode
     def check_rtn(self, errorStatus, message=""):
