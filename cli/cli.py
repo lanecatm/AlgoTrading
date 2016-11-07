@@ -23,9 +23,14 @@ def cli():
 	pass
 
 @click.command()
-@click.option('--username', prompt=True, default=lambda: os.environ.get('USER', ''))
-def hello():
-	click.echo('Hello world.')
+def initdb():
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
+	# Create Table Orders
+	cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text)')
+	cursor.close()
+	conn.commit()
+	conn.close()
 
 @click.command()
 @click.option('--buysell', type=click.Choice(['buy','sell']), default='buy', help='Buy or sell the stock? Default is buy')
@@ -58,7 +63,6 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 	cursor = conn.cursor()
 	
 	# Create table, only at 1st time runned. 
-	#cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text)')
 	
 	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg) values (?,?,?,?,?,?)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
 	# print cursor.lastrowid
@@ -76,42 +80,50 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 @click.command()
 @click.option('--orderid', help='The ID of the order you want to show')
 @click.option('--stockid', help='The ID of the stock you want to show')
+@click.option('--sql', help='Costomized SQL query')
 def showorder(orderid, stockid):
-	if orderid != None:
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
+	if sql != None:
+		cursor.execute(sql)
+	elif orderid != None:
 		print 'Retrieving order No.'+str(orderid)+'...'
 		# get it from DB
-	else: 
-		if stockid != None:
-			print 'Retrieving orders of Stock '+str(stockid)+'...'
-			# get them from DB
-		else:
-			print 'Retrieving all orders...'
-			# print all
-			conn = sqlite3.connect(dbfile)
-			cursor = conn.cursor()
-			cursor.execute('select * from orders')
-			values = cursor.fetchall()
-			print '   B/S   Stock  Amt       Start Time             End Time        Alg.'
-			for row in values:
-				print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]
-			cursor.close()
-			conn.close()
-	pass
+		cursor.execute('select * from orders where id=?',(str(orderid),))
+	elif stockid != None:
+		print 'Retrieving orders of Stock '+str(stockid)+'...'
+		# get them from DB
+		cursor.execute('select * from orders where stockid=?',(str(stockid),))
+		# cursor.execute('select * from orders where stockid=100100')
+	else:
+		print 'Retrieving all orders...'
+		# print all
+		cursor.execute('select * from orders')
+	values = cursor.fetchall()
+	print '   B/S   Stock  Amt       Start Time             End Time      Alg.'
+	for row in values:
+		print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]
+	cursor.close()
+	conn.close()
 
 @click.command()
-@click.option('--orderid', prompt=True, help='The ID of the order you want to show')
-@click.confirmation_option(help='Are you sure to place this order?')
+@click.option('--orderid', prompt=True, help='The ID of the order you want to delete')
+@click.confirmation_option(help='Are you sure to DELETE this order?')
 def deleteorder(orderid):
 	# TBD
 	# if : # check id
 	# 	# delete from db
 	# else:
 	# 	print 'Error. No such order named'+str(orderid)
-
-	pass
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
+	cursor.execute('delete from orders where id=?',(str(orderid),))
+	cursor.close()
+	conn.commit()
+	conn.close()	
 
 @click.command()
-def execorder():
+def run():
 	# pass order to AlgoTrading module
 	pass
 
@@ -131,11 +143,10 @@ def showresult(orderid, stockid):
 			# print all
 
 
-cli.add_command(hello)
 cli.add_command(placeorder)
 cli.add_command(showorder)
 cli.add_command(deleteorder)
-cli.add_command(execorder)
+cli.add_command(run)
 cli.add_command(showresult)
 
 if __name__ == "__main__":
