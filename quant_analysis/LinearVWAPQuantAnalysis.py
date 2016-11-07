@@ -12,7 +12,7 @@ import datetime
 import numpy as np
 
 
-class VWAPQuantAnalysis(quantAnalysisBase):
+class LinearVWAPQuantAnalysis(quantAnalysisBase):
     def __init__(self, repoEngine):
         self.repoEngine = repoEngine
         return
@@ -49,7 +49,7 @@ class VWAPQuantAnalysis(quantAnalysisBase):
                 endTimeList.append(datetime.datetime.strptime('15:00:00', '%H:%M:%S').time())
             endTimeList.append(endTime.time())
         for j in range(len(startTimeList)):
-            historyDataList = get_amount(startDate,endDate,startTimeList[j],endTimeList[j])
+            historyDataList = self.repoEngine.get_amount(startDate,endDate,startTimeList[j],endTimeList[j])
             historyDataList = np.array(historyDataList)
             for k in range(20):
                 #≥À“‘»®÷ÿ
