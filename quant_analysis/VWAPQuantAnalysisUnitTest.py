@@ -9,19 +9,20 @@
 # Description: VWAPQuantAnalysis单元测试
 # ==============================================================================
 import time
-#import datetime
+import datetime
 from VWAPQuantAnalysis import VWAPQuantAnalysis
 
 class repoTest:
-    def get_amount(self, startDate, endDate, startTime, endTime):
-        print startDate, endDate, startTime, endTime
+    def get_amount( self, startDate, endDate, startTime, endTime):
+        return [[1,2,3,4]]*20
+	#print startDate, endDate, startTime, endTime
 
 if __name__ == '__main__':
-    repoEngine = repoTest
+    repoEngine = repoTest()
 
     VWAPAnalysis = VWAPQuantAnalysis(repoEngine)
-    startDate= time.strptime("2016-11-01 10:00:00" , "%Y-%m-%d %H:%M:%S")
-    endDate = time.strptime("2016-10-10 13:00:00", "%Y-%m-%d %H:%M:%S")
+    startDate=datetime.datetime.strptime("2016-11-01 10:00:00" , "%Y-%m-%d %H:%M:%S")
+    endDate = datetime.datetime.strptime("2016-10-10 13:00:00", "%Y-%m-%d %H:%M:%S")
 
     VWAPAnalysis.getRecommendOrderWeight(startDate, endDate, 1)
     
