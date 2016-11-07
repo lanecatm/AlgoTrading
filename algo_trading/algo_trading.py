@@ -41,9 +41,9 @@ class algo_trading:
 
     # 获取量化分析结果
     def GetQuantAnalysisResult(self):
-        if self.clientOrder.algChoice == "TWAP":
+        if self.clientOrder.algChoice == "twap":
             quant_analysis = TWAPQuantAnalysis()
-        elif self.clientOrder.algChoice == "VWAP":
+        elif self.clientOrder.algChoice == "vwap":
             quant_analysis = VWAPQuantAnalysis()
         self.quant_result = quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
