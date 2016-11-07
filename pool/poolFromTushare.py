@@ -13,6 +13,7 @@ sys.path.append("../common/")
 import MarketData
 from tradingUnit import tradingUnit
 import copy
+from saveTradingRecord import saveTradingRecord
 
 class poolFromTushare:
     def __init__(self, marketDataGetter, saveEngine):
@@ -20,18 +21,20 @@ class poolFromTushare:
         self.marketDataGetter = marketDataGetter
         self.saveEngine = saveEngine
     
-    def getMarketTradingData(self, time):
-        #self.marketDataGetter
+    def get_market_trading_data(self, time):
+        # TODO 连上数据库
+        price, amount = self.marketDataGetter.get_data()
         return price, amount
 
-    def tradeOrder(self, tradingUnit):
+    def trade_order(self, tradingUnit):
         # 这里完成的是市价单的操作
         # TODO 限价单
         nowTradingUnit = copy.deepcopy(tradingUnit)
         nowTradingUnit.isSuccess = True
-        price, amount = self.getMarketTradingData(tradingUnit.time)
+        price, amount = self.get_market_trading_data(tradingUnit.time)
         nowTradingUnit.price = price
-        return tradingUnit 
+        self.saveEngine.save_record(nowTradingUnit)
+        return nowTradingUnit
 
         
 

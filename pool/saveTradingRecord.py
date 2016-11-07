@@ -49,6 +49,3 @@ class saveTradingRecord:
         self._connection.commit()
         cursor.close()
  
-
-
-        
