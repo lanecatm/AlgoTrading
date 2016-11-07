@@ -134,11 +134,11 @@ def showresult(orderid, stockid):
 	if orderid != None:
 		click.echo('Retrieving result of order No.'+str(orderid)+'...')
 		# get it from DB
-		cursor.execute('select * from orders where id=?',(str(orderid),))
+		cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where id=?',(str(orderid),))
 	elif stockid != None:
 		click.echo('Retrieving results of Stock '+str(stockid)+'...')
 		# get them from DB
-		cursor.execute('select * from orders where stockid=?',(str(stockid),))
+		cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where stockid=?',(str(stockid),))
 		# cursor.execute('select * from orders where stockid=100100')
 	else:
 		click.echo('Retrieving all results...')
