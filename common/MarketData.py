@@ -11,6 +11,8 @@ import datetime
 
 class MarketData:
     def __init__(self, originArr):
+        # TODO 添加stockId的传入
+        self.stockId = 0
         #self.time
         self.buyPrice = []
         self.buyAmount = []

@@ -20,14 +20,16 @@ class poolFromSinaApi:
         self.historyTradingList = []
         self.marketDataGetter = marketDataGetter
     
-    def get_market_trading_data(self):
+    # 获取交易数据
+    def __get_market_trading_data(self):
         originArr = get_data()
         marketData = MarketData(originArr)
-        #return self.marketDataGetter.get()
+        return marketData
 
+    # 判断这一单的执行情况
     def trade_order(self, tradingUnit):
-        marketData = getMarketTradingData()
-        if tradingUnit.attribute == True:
+        marketData = self__getMarketTradingData()
+        if tradingUnit.buysell == True:
             # buy
             # 如果符合卖1卖2...查找下去
             nowTradingList = []
@@ -61,7 +63,17 @@ class poolFromSinaApi:
                     nowLeftAmount = nowLeftAmount - marketData.buyAmount[i]
                     nowTradingList.append(nowTradingUnit)
 
-        return tradingUnit 
+        # 把买1买2的子订单合成总订单
+        succAmount = 0
+        succMoney = 0
+        for tmpUnit in nowTradingList:
+            succAmount = tmpUnit.amount + succAmount
+            succMoney = tmpUnit.amount * tmpUnit.price + succMoney
+        ansTradingUnit = copy.deepcopy(tradingUnit)
+        ansTradingUnit.amount = succAmount
+        ansTradingUnit.price = succMoney / float(succAmount)
+        ansTradingUnit.isSuccess = True
+        return ansTradingUnit
 
         
 
