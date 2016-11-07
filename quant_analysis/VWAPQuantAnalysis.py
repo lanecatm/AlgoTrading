@@ -2,61 +2,28 @@
 # =============================================================================
 # Filename: VWAPQuantAnalysis.py
 # Author: Yuchang Xu
-# Description: ¼òµ¥¼ÓÈ¨»¬¶¯Æ½¾ùVWAPÊµÏÖ
+# Description: ç®€å•æ»‘åŠ¨å¹³å‡VWAPå®ç°
 # ==============================================================================
-from quantAnalysisBase import quantAnalysisBase
-#from repo import get_amount
 import sys
-sys.path.append("../fetch_data")
-import repo
 import datetime
 import numpy as np
+from quantAnalysisBase import quantAnalysisBase
+sys.path.append("../fetch_data")
+import repo
+sys.path.append("../tool")
+from Log import Log
+
 class VWAPQuantAnalysis(quantAnalysisBase):
+
     def __init__(self, repoEngine):
         self.repoEngine = repoEngine
+        self.log = Log()
         return
-
-    #def getHistoryData(self):
-    #»ñÈ¡ÀúÊ·Êı¾İ
-         
     
-    def getRecommendOrderWeight(self, startTime, endTime, timeInterval):
-        #startTime=datetime.datetime.fromtimestamp(startTime)
-        #endTime=datetime.datetime.fromtimestamp(endTime)
-        ansWeightList = []
-        historyDataList = []
-        predictList = []
-        startTimeList = []
-        endTimeList = []
-        n=datetime.timedelta(days=20)    #È¡¶àÉÙÌìÊıÆ½¾ù
-        delta = (endTime - startTime).days  #ÏÂµ¥¿ªÊ¼ºÍ½áÊøÌìÊı²î
-        startDate=startTime.date()
-        endDate=startDate-n
-        if delta == 0:   
-        #²»¸ôÌì
-            startTimeList.append(startTime.time())
-            endTimeList.append(endTime.time())
-        elif delta == 1:  
-        #Ö»¸ôÒ»Ìì
-            startTimeList.append(startTime.time())
-            startTimeList.append(datetime.datetime.strptime('09:00:00', '%H:%M:%S').time())
-            endTimeList.append(datetime.datetime.strptime('15:00:00', '%H:%M:%S').time())
-            endTimeList.append(endTime.time())
-        else:       
-        #¸ôÒ»ÌìÒÔÉÏ
-            startTimeList.append(startTime.time())
-            for i in range(delta-1):
-                startTimeList.append(datetime.datetime.strptime('09:00:00', '%H:%M:%S').time())
-                endTimeList.append(datetime.datetime.strptime('15:00:00', '%H:%M:%S').time())
-            endTimeList.append(endTime.time())
-        for j in range(len(startTimeList)):
-            historyDataList = self.repoEngine.get_amount(startDate,endDate,startTimeList[j],endTimeList[j])
-            tempDataList = zip(*historyDataList)
-            lengthOfData = len(tempDataList)
-            for i in range(lengthOfData):
-                predictList.append(sum(tempDataList[i])/20.0)
-        predictList = np.array(predictList)
-        ansWeightList = predictList/sum(predictList)
-        print ansWeightList
+    # ç›®å‰timeIntervalæ²¡æœ‰ç”¨åˆ°ï¼Œå…¨éƒ¨ä»¥1åˆ†é’Ÿè®¡
+    def getRecommendOrderWeight(self, startTime, endTime, timeInterval, findLastDays = 20):
+        predictList = quantAnalysisBase.getHistoryData(self, startTime, endTime, timeInterval, findLastDays)
+        ansWeightList = np.sum(predictList, axis = 0, dtype = np.float) / np.sum(predictList, dtype = np.float)
+        self.log.info(str(ansWeightList))
         return ansWeightList
 
