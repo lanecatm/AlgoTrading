@@ -22,8 +22,8 @@ class VWAPQuantAnalysis(quantAnalysisBase):
     
     def getRecommendOrderWeight(self, startTime, endTime, timeInterval):
         #startTime=datetime.datetime.fromtimestamp(startTime)
-	#endTime=datetime.datetime.fromtimestamp(endTime)
-	ansWeightList = []
+        #endTime=datetime.datetime.fromtimestamp(endTime)
+        ansWeightList = []
         historyDataList = []
         predictList = []
         startTimeList = []
@@ -57,6 +57,6 @@ class VWAPQuantAnalysis(quantAnalysisBase):
                 predictList.append(sum(tempDataList[i])/20.0)
         predictList = np.array(predictList)
         ansWeightList = predictList/sum(predictList)
-	print ansWeightList
+        print ansWeightList
         return ansWeightList
 

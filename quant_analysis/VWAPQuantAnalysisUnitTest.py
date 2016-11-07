@@ -14,8 +14,8 @@ from VWAPQuantAnalysis import VWAPQuantAnalysis
 
 class repoTest:
     def get_amount( self, startDate, endDate, startTime, endTime):
+        print startDate, endDate, startTime, endTime
         return [[1,2,3,4]]*20
-	#print startDate, endDate, startTime, endTime
 
 if __name__ == '__main__':
     repoEngine = repoTest()
