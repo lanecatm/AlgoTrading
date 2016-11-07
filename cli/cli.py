@@ -15,7 +15,7 @@ import sqlite3
 
 
 
-dbfile = 'test1.db'
+dbfile = 'test.db'
 
 
 @click.group()
@@ -27,7 +27,7 @@ def initdb():
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	# Create Table Orders
-	cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text)')
+	cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text, status int)')
 	cursor.close()
 	conn.commit()
 	conn.close()
@@ -53,24 +53,13 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 	start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
 	end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
 	# print start_t 
-	# print end_t
-
-	# store as an object
-	# order = clientOrder(buysell, stockid, start_t, end_t, amount, alg)
+	# print end_t)
 
 	# store into database
 	conn = sqlite3.connect(dbfile)
-	cursor = conn.cursor()
-	
-	# Create table, only at 1st time runned. 
-	
-	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg) values (?,?,?,?,?,?)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
+	cursor = conn.cursor() 
+	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg, status) values (?,?,?,?,?,?,0)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
 	# print cursor.lastrowid
-	
-	# cursor.execute('select * from orders')
-	# values = cursor.fetchall()
-	# print values
-
 	cursor.close()
 	conn.commit()
 	conn.close()
@@ -81,7 +70,7 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 @click.option('--orderid', help='The ID of the order you want to show')
 @click.option('--stockid', help='The ID of the stock you want to show')
 @click.option('--sql', help='Costomized SQL query')
-def showorder(orderid, stockid):
+def showorder(orderid, stockid, sql):
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	if sql != None:
@@ -100,9 +89,9 @@ def showorder(orderid, stockid):
 		# print all
 		cursor.execute('select * from orders')
 	values = cursor.fetchall()
-	print '   B/S   Stock  Amt       Start Time             End Time      Alg.'
+	print '   B/S   Stock  Amt       Start Time             End Time      Alg.  Staus'
 	for row in values:
-		print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]
+		print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]+'    '+str(row[7])
 	cursor.close()
 	conn.close()
 
@@ -124,7 +113,21 @@ def deleteorder(orderid):
 
 @click.command()
 def run():
-	# pass order to AlgoTrading module
+	# pass orderlist to AlgoTrading module
+	orderlist = []
+
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
+	cursor.execute('select * from orders where status=0')
+	values = cursor.fetchall()
+	for row in values:
+		orderlist.append(clientOrder(row[0],row[2],row[4],row[5],row[3],row[6],row[1],1,1))
+		#pass to algo trading
+		click.echo(orderlist[0].stockId)
+	cursor.execute('update orders set status=1 where status=0')
+	cursor.close()
+	conn.commit()
+	conn.close()
 	pass
 
 @click.command()
@@ -142,7 +145,7 @@ def showresult(orderid, stockid):
 			print 'Retrieving all results...'
 			# print all
 
-
+cli.add_command(initdb)
 cli.add_command(placeorder)
 cli.add_command(showorder)
 cli.add_command(deleteorder)
