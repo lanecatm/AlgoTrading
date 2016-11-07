@@ -10,55 +10,26 @@ sys.path.append("../fetch_data")
 import repo
 import datetime
 import numpy as np
-
-
+sys.path.append("../tool")
+from Log import Log
 class LinearVWAPQuantAnalysis(quantAnalysisBase):
     def __init__(self, repoEngine):
+        self.log = Log()
         self.repoEngine = repoEngine
         return
 
-
-    #def getHistoryData(self):
-    # return
-         
-    def getRecommendOrderWeight(self, startTime, endTime, timeInterval):
-	ansWeightList = []
-        historyDataList = []
-        predictList = []
-        startTimeList = []
-        endTimeList = []
-        n=datetime.timedelta(days=20)    #取多少天数平均
-        delta = (endTime - startTime).days  #下单开始和结束天数差
-        startDate=startTime.date()
-        endDate=startDate-n
-        if delta == 0:   
-        #不隔天
-            startTimeList.append(startTime.time())
-            endTimeList.append(endTime.time())
-        elif delta == 1:  
-        #只隔一天
-            startTimeList.append(startTime.time())
-            startTimeList.append(datetime.datetime.strptime('09:00:00', '%H:%M:%S').time())
-            endTimeList.append(datetime.datetime.strptime('15:00:00', '%H:%M:%S').time())
-            endTimeList.append(endTime.time())
-        else:       
-        #隔一天以上
-            startTimeList.append(startTime.time())
-            for i in range(delta-1):
-                startTimeList.append(datetime.datetime.strptime('09:00:00', '%H:%M:%S').time())
-                endTimeList.append(datetime.datetime.strptime('15:00:00', '%H:%M:%S').time())
-            endTimeList.append(endTime.time())
-        for j in range(len(startTimeList)):
-            historyDataList = self.repoEngine.get_amount(startDate,endDate,startTimeList[j],endTimeList[j])
-            historyDataList = np.array(historyDataList)
-            for k in range(20):
-                #乘以权重
-                historyDataList[k]*(20-k)
-            tempDataList = zip(*historyDataList)
-            lengthOfData = len(tempDataList)
-            for i in range(lengthOfData):
-                predictList.append(sum(tempDataList[i])/(20.0*210))
-        predictList = np.array(predictList)
-        ansWeightList = predictList/sum(predictList)
+    def getRecommendOrderWeight(self, startTime, endTime, timeInterval, findLastDays = 20):
+        predictList = quantAnalysisBase.getHistoryData(self, startTime, endTime, timeInterval, findLastDays)
+        weightUnit = []
+        for i in range(findLastDays, 0, -1):
+            weightUnit.append([i / ((1.0 + findLastDays) * findLastDays / 2.0)])
+        self.log.info("weightUnit\n" + str(weightUnit))
+        weight = weightUnit
+        for i in range(predictList.shape[1] - 1):
+            weight = np.hstack((weight,weightUnit))
+        self.log.info("weight\n" + str(weight))
+        predictList = predictList * weight
+        ansWeightList = np.sum(predictList, axis = 0, dtype = np.float) / np.sum(predictList, dtype = np.float)
+        self.log.info("ans\n" + str(ansWeightList))
         return ansWeightList
 
