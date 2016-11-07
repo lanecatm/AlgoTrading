@@ -12,10 +12,11 @@ import datetime
 from MarketData import MarketData
 import sys
 sys.path.append("../fetch_data/")
-import getData
+from marketDataGetter import marketDataGetter
 
 if __name__=='__main__':
-    originArr = getData.get_data()
+    market = marketDataGetter()
+    originArr = market.get_data()
     marketData = MarketData(originArr)
     print marketData.sellPrice
     print marketData.sellAmount

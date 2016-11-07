@@ -8,9 +8,12 @@
 # Description: marketdata 数据类
 # ==============================================================================
 import datetime
-
+import sys
+sys.path.append("../tool")
+from Log import Log
 class MarketData:
     def __init__(self, originArr):
+        self.log = Log()
         # TODO 添加stockId的传入
         self.stockId = 0
         #self.time
@@ -27,6 +30,8 @@ class MarketData:
             self.sellPrice.append(originArr[i+1])
 
         
+        self.log.info("date from arr:" + str(originArr[-2]))
+        self.log.info("time from arr:" + str(originArr[-1]))
         self.time = datetime.datetime.strptime(originArr[-2] + originArr[-1], '"%Y-%m-%d""%H:%M:%S"')
 
 

@@ -10,10 +10,10 @@
 import copy
 import sys
 sys.path.append("../common/")
-import MarketData
-import TradingUnit
+from MarketData import MarketData
+import tradingUnit
 sys.path.append("../fetch_data/")
-import getData
+from marketDataGetter import marketDataGetter
 
 class poolFromSinaApi:
     def __init__(self, marketDataGetter):
@@ -22,13 +22,13 @@ class poolFromSinaApi:
     
     # 获取交易数据
     def __get_market_trading_data(self):
-        originArr = get_data()
+        originArr = self.marketDataGetter.get_data()
         marketData = MarketData(originArr)
         return marketData
 
     # 判断这一单的执行情况
     def trade_order(self, tradingUnit):
-        marketData = self__getMarketTradingData()
+        marketData = self.__get_market_trading_data()
         if tradingUnit.buysell == True:
             # buy
             # 如果符合卖1卖2...查找下去
@@ -50,14 +50,17 @@ class poolFromSinaApi:
         else:
             # sell
             # 如果符合买一买二...查找下去
-            nowTradingUnit = copy.deepcopy(tradingUnit)
-            nowTradingUnit.price = marketData.buyPrice[i]
-            nowTradingList.append(nowTradingUnit)
-            if nowLeftAmount <= marketData.buyAmount[i]:
-                    nowTradingUnit.amount = nowLeftAmount
-                    nowLeftAmount = 0
-                    nowTradingList.append(nowTradingUnit)
-                    break
+            nowTradingList = []
+            nowLeftAmount = tradingUnit.amount
+            for i in range(0, 5):
+                nowTradingUnit = copy.deepcopy(tradingUnit)
+                nowTradingUnit.price = marketData.buyPrice[i]
+                nowTradingList.append(nowTradingUnit)
+                if nowLeftAmount <= marketData.buyAmount[i]:
+                        nowTradingUnit.amount = nowLeftAmount
+                        nowLeftAmount = 0
+                        nowTradingList.append(nowTradingUnit)
+                        break
                 else:
                     nowTradingUnit.amount = marketData.buyAmount[i]
                     nowLeftAmount = nowLeftAmount - marketData.buyAmount[i]
