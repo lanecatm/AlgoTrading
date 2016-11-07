@@ -15,7 +15,7 @@ import sqlite3
 
 
 
-dbfile = 'test.db'
+dbfile = 'test_0.1.db'
 
 
 @click.group()
@@ -24,10 +24,12 @@ def cli():
 
 @click.command()
 def initdb():
+	"""Initialize Database before placing any order."""
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	# Create Table Orders
-	cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text, status int)')
+	cursor.execute('create table orders (id integer primary key autoincrement, buysell text, stockid text, start text, end text, amount int, alg text, status int, total float, ap float, wap float)')
+	# cursor.execute('create table results (order id )')
 	cursor.close()
 	conn.commit()
 	conn.close()
@@ -43,8 +45,8 @@ def initdb():
 @click.option('--alg', type=click.Choice(['twap','vwap']), prompt=True, help='Trading algorithms, TWAP/VWAP')
 @click.confirmation_option(help='Are you sure to place this order?')
 def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
+	"""Place an order"""
 	click.echo('Placing Order...')
-	
 	# transfer time format
 	if starttime is None:
 		starttime = '9:00:00'
@@ -52,14 +54,12 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 		endtime = '15:00:00'
 	start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
 	end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
-	# print start_t 
-	# print end_t)
 
 	# store into database
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor() 
-	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg, status) values (?,?,?,?,?,?,0)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
-	# print cursor.lastrowid
+	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg, status, total) values (?,?,?,?,?,?,0,0)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
+	# click.echo() cursor.lastrowid
 	cursor.close()
 	conn.commit()
 	conn.close()
@@ -71,27 +71,28 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 @click.option('--stockid', help='The ID of the stock you want to show')
 @click.option('--sql', help='Costomized SQL query')
 def showorder(orderid, stockid, sql):
+	"""Show the detail of orders placed"""
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	if sql != None:
 		cursor.execute(sql)
 	elif orderid != None:
-		print 'Retrieving order No.'+str(orderid)+'...'
+		click.echo('Retrieving order No.'+str(orderid)+'...')
 		# get it from DB
 		cursor.execute('select * from orders where id=?',(str(orderid),))
 	elif stockid != None:
-		print 'Retrieving orders of Stock '+str(stockid)+'...'
+		click.echo('Retrieving orders of Stock '+str(stockid)+'...')
 		# get them from DB
 		cursor.execute('select * from orders where stockid=?',(str(stockid),))
 		# cursor.execute('select * from orders where stockid=100100')
 	else:
-		print 'Retrieving all orders...'
-		# print all
+		click.echo('Retrieving all orders...')
+		# click.echo() all
 		cursor.execute('select * from orders')
 	values = cursor.fetchall()
-	print '   B/S   Stock  Amt       Start Time             End Time      Alg.  Staus'
+	click.echo('   B/S   Stock    Amt       Start Time             End Time      Alg.  Staus')
 	for row in values:
-		print str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]+'    '+str(row[7])
+		click.echo(str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]+'    '+str(row[7]))
 	cursor.close()
 	conn.close()
 
@@ -99,11 +100,7 @@ def showorder(orderid, stockid, sql):
 @click.option('--orderid', prompt=True, help='The ID of the order you want to delete')
 @click.confirmation_option(help='Are you sure to DELETE this order?')
 def deleteorder(orderid):
-	# TBD
-	# if : # check id
-	# 	# delete from db
-	# else:
-	# 	print 'Error. No such order named'+str(orderid)
+	"""Delete order by order ID"""
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	cursor.execute('delete from orders where id=?',(str(orderid),))
@@ -112,38 +109,48 @@ def deleteorder(orderid):
 	conn.close()	
 
 @click.command()
-def run():
-	# pass orderlist to AlgoTrading module
+def run():	
+	"""Execute new placed orders"""
 	orderlist = []
-
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor()
 	cursor.execute('select * from orders where status=0')
 	values = cursor.fetchall()
 	for row in values:
-		orderlist.append(clientOrder(row[0],row[2],row[4],row[5],row[3],row[6],row[1],1,1))
+		orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S'),row[3],row[6],row[1],1,1))
 		#pass to algo trading
-		click.echo(orderlist[0].stockId)
 	cursor.execute('update orders set status=1 where status=0')
 	cursor.close()
 	conn.commit()
 	conn.close()
-	pass
 
 @click.command()
 @click.option('--orderid', help='The ID of the order you want to show')
 @click.option('--stockid', help='The ID of the stock you want to show')
 def showresult(orderid, stockid):
+	"""Show the result of order execution"""
+	conn = sqlite3.connect(dbfile)
+	cursor = conn.cursor()
 	if orderid != None:
-		print 'Retrieving result of order No.'+str(orderid)+'...'
+		click.echo('Retrieving result of order No.'+str(orderid)+'...')
 		# get it from DB
-	else: 
-		if stockid != None:
-			print 'Retrieving results of of Stock '+str(stockid)+'...'
-			# get them from DB
-		else:
-			print 'Retrieving all results...'
-			# print all
+		cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where id=?',(str(orderid),))
+	elif stockid != None:
+		click.echo('Retrieving results of Stock '+str(stockid)+'...')
+		# get them from DB
+		cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where stockid=?',(str(stockid),))
+		# cursor.execute('select * from orders where stockid=100100')
+	else:
+		click.echo('Retrieving all results...')
+		# click.echo() all
+		cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
+	values = cursor.fetchall()
+	click.echo('   B/S   Stock   Amt  Tuneover AP  Alg  WAP')
+	#print values
+	for row in values:
+		click.echo(str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[3])+'  '+str(row[5])+'  '+str(row[6])+'  '+str(row[4])+'  '+str(row[7]))
+	cursor.close()
+	conn.close()
 
 cli.add_command(initdb)
 cli.add_command(placeorder)

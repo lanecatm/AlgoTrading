@@ -11,4 +11,4 @@ class clientOrder(object):
 		self.algChoice = algChoice
 		self.buysell = buysell
 		self.timeInterval = timeInterval
-                self.status = status # 0 places, 1 sent, 2 completed
+		self.status = status # 0 places, 1 sent, 2 completed
