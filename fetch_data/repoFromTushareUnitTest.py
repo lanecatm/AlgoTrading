@@ -12,5 +12,5 @@ import time
 
 if __name__ == '__main__':
     repoEngine = repoFromTushare()
-    repoEngine.get_amount(time.strptime("2016-11-01", "%Y-%m-%d"),time.strptime("2016-10-31", "%Y-%m-%d"),time.strptime("09:10:00", "%H:%M:%S"),time.strptime("09:13:00", "%H:%M:%S"))
+    repoEngine.get_amount(time.strptime("2016-10-24", "%Y-%m-%d"),time.strptime("2016-10-20", "%Y-%m-%d"),time.strptime("13:00:00", "%H:%M:%S"),time.strptime("14:59:00", "%H:%M:%S"))
 
