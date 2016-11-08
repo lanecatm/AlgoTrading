@@ -14,10 +14,15 @@ from clientOrder import clientOrder
 import algo_trading
 from datetime import datetime
 import sqlite3
+sys.path.append("../pool")
+from tradingRecordRepo import tradingRecordRepo
+from tradingUnit import tradingUnit
 
 
 
 dbfile = 'test_0.1.db'
+TRADING_RECORD_DB = 'test_trading_record.db'
+#TRADING_RECORD_DB = 'trading_record'
 
 
 @click.group()
@@ -161,12 +166,27 @@ def showresult(orderid, stockid):
     cursor.close()
     conn.close()
 
+@click.command()
+@click.option('--orderid', help='The ID of the order you want to show')
+def monitor(orderid):
+    repo = tradingRecordRepo(TRADING_RECORD_DB)
+    if orderid == None:
+        recordList = repo.get_history_record()
+    else:
+        recordList = repo.get_history_record(orderid)
+
+    click.echo('Order\tStock\tBuyOrSell\tPrice\tNumber\tTime\t')
+    for row in recordList:
+        click.echo(str(row.orderId)+'\t'+str(row.stockId)+'\t'+str(row.buysell)+'\t\t'+str(row.price)+'\t'+str(row.amount)+'\t'+ row.time.strftime("%Y-%m-%d %H:%M:%S"))
+
+ 
 cli.add_command(initdb)
 cli.add_command(placeorder)
 cli.add_command(showorder)
 cli.add_command(deleteorder)
 cli.add_command(run)
 cli.add_command(showresult)
+cli.add_command(monitor)
 
 if __name__ == "__main__":
     cli()
