@@ -92,9 +92,9 @@ def showorder(orderid, stockid, sql):
     	# click.echo() all
     	cursor.execute('select * from orders')
     values = cursor.fetchall()
-    click.echo('   B/S   Stock    Amt       Start Time             End Time      Alg.  Staus')
+    click.echo(' \tB/S\tStock\tAmt\tStart Time\t\tEnd Time\t\tAlg.\tStaus')
     for row in values:
-    	click.echo(str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[5])+'  '+row[3]+'  '+row[4]+'  '+row[6]+'    '+str(row[7]))
+    	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[5])+'\t'+row[3]+'\t'+row[4]+'\t'+row[6]+'\t'+str(row[7]))
     cursor.close()
     conn.close()
 
