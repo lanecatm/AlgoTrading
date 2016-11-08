@@ -8,7 +8,7 @@
 # Description: save each trade record
 # ==============================================================================
 import copy
-import sys
+import sys, os
 sys.path.append("../common/")
 from tradingUnit import tradingUnit
 import datetime
@@ -25,6 +25,12 @@ class tradingRecordRepo:
         #print self._db_file_path
         self._connection = sqlite3.connect(self._db_file_path)
         self.log = Log()
+        #print self._db_file_path
+        filename = sys._getframe().f_code.co_filename
+        filePath = os.path.realpath(filename).rsplit('/', 1)[0]
+        self.log.info("file path: " + filePath)
+        self._connection = sqlite3.connect(filePath + "/"+ self._db_file_path)
+
 
 
     def __del__(self):
