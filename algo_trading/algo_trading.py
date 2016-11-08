@@ -11,19 +11,24 @@ import sys
 sys.path.append("../common/")
 import clientOrder
 import orderResult
-import tradingUnit
+from tradingUnit import tradingUnit
 sys.path.append("../quant_analysis")
 from TWAPQuantAnalysis import TWAPQuantAnalysis
 from VWAPQuantAnalysis import VWAPQuantAnalysis
 sys.path.append("../pool")
 # import poolFromSinaApi
-import poolFromTushare
+from poolFromTushare import poolFromTushare
 import sqlite3
 sys.path.append("../cli/")
 #from cli import dbfile
 dbfile = 'test_0.1.db'
 #from datetime import datetime
 import datetime
+from tradingRecordRepo import tradingRecordRepo
+
+class mockMarketDataGetter:
+    def get_data(self):
+        return 20.0, 100
 
 class algo_trading:
     def __init__(self, ClientOrder):
@@ -38,17 +43,21 @@ class algo_trading:
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         turnover = 0
-        #timeInterval = datetime.timede('0:1:0','%H:%M:%S')
+        marketGetter = mockMarketDataGetter()
+        saveEngine = tradingRecordRepo("test_trading_record.db")
+        pool = poolFromTushare(marketGetter, saveEngine)
+
         # vwap = 0
         for i in range(len(self.quant_result)):
             tradingTime = tradingTime + datetime.timedelta(minutes=1)
             stockId = self.clientOrder.stockId
             amount = self.clientOrder.stockAmount * self.quant_result[i] # waht if  小数
             buysell = self.clientOrder.buysell
-            inTradingUnit = tradingUnit(tradingTime, stockId, amount, buysell, None, None, self.clientOrder.orderId)
+            inTradingUnit = tradingUnit(self.clientOrder.orderId, stockId, buysell, amount, None, None, tradingTime)
+
             # 执行 pool 交易
             #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
-            outTradingUnit = poolFromTushare.trade_order(inTradingUnit)
+            outTradingUnit = pool.trade_order(inTradingUnit)
             self.resultList.append(outTradingUnit)
             
             turnover += outTradingUnit.price * amount

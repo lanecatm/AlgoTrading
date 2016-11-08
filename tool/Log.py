@@ -5,7 +5,7 @@ import ErrorCode
 from FileHelper import FileHelper
 
 class Log:
-    def __init__(self, isOpen = True, saveInfo = True, saveWarning = True, saveError = True, logDirName = "log"):
+    def __init__(self, isOpen = False, saveInfo = True, saveWarning = True, saveError = True, logDirName = "log"):
         self.saveInfo = saveInfo
         self.saveError = saveError
         self.saveWarning = saveWarning
