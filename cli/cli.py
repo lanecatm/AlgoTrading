@@ -56,7 +56,7 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 		endtime = '15:00:00'
 	start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
 	end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
-
+	print str(end_t-start_t)
 	# store into database
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor() 
@@ -119,7 +119,11 @@ def run():
 	cursor.execute('select * from orders where status=0')
 	values = cursor.fetchall()
 	for row in values:
-		orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S'),row[3],row[6],row[1],1,1))
+            if row[1]=='buy':
+                buysell = True
+            else:
+                buysell = False 
+            orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S'),row[3],row[6],buysell,datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S')-datetime.strptime(row[4],'%Y-%m-%d %H:%M:%S'),1))
 		#pass to algo trading
 	singletrade = algo_trading(orderlist[0])
 	singletrade.getQuantAnalysisResult()
