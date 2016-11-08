@@ -1,1 +1,10 @@
-python cli.py placeorder --stockid 100100 --amount 200 --start 2016-12-1 --end 2016-12-1 --alg vwap
+python cli.py placeorder --stockid 100100 --amount 10000 --start 2016-12-1 --end 2016-12-1 --alg vwap --yes
+python cli.py placeorder --stockid 600123 --amount 15000 --start 2016-12-2 --end 2016-12-2 --alg twap --yes
+python cli.py placeorder --stockid 600123 --amount 12000 --start 2016-12-2 --end 2016-12-2 --alg twap --yes
+python cli.py placeorder --stockid 111111 --amount 10000 --start 2016-12-4 --end 2016-12-4 --alg vwap --yes
+python cli.py placeorder --stockid 100100 --amount 12000 --start 2016-12-5 --end 2016-12-5 --alg vwap --yes
+python cli.py placeorder --stockid 100100 --amount 10000 --start 2016-12-1 --end 2016-12-1 --alg vwap --yes
+python cli.py placeorder --stockid 100100 --amount 10000 --start 2016-12-3 --end 2016-12-3 --alg vwap --yes
+python cli.py placeorder --stockid 600123 --amount 20000 --start 2016-12-5 --end 2016-12-5 --alg twap --yes
+python cli.py placeorder --stockid 100100 --amount 10000 --start 2016-12-9 --end 2016-12-9 --alg twap --yes
+python cli.py placeorder --stockid 100100 --amount 10000 --start 2016-12-10 --end 2016-12-10 --alg vwap --yes

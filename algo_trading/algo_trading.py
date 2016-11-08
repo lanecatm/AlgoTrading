@@ -28,7 +28,7 @@ class algo_trading:
         self.clientOrder = CO
 
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
-    def tradeReques(self):
+    def tradeRequest(self):
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         for i in range(len[self.quant_result]):
