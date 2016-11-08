@@ -11,7 +11,7 @@
 import datetime
 import numpy as np
 def abstract():
-    raise NotImplimentedError("Abstract")
+    raise NotImplementedError
 
 class quantAnalysisBase:
 
