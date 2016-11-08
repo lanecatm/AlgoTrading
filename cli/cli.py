@@ -27,6 +27,14 @@ TRADING_RECORD_DB = 'test_trading_record.db'
 
 @click.group()
 def cli():
+    """
+    This is the Command Line Interface(CLI) for Algorithmic Trading System. \n
+    Manual:\n
+    Initialize Database first by command 'initdb'. 
+    Then place order by command 'placeorder'. 
+    You can check and edit orders by commands 'showorder' and 'deleteorder'. 
+    Execute order by command 'run' when you are sure about your order.
+    """
     pass
 
 @click.command()
@@ -169,6 +177,7 @@ def showresult(orderid, stockid):
 @click.command()
 @click.option('--orderid', help='The ID of the order you want to show')
 def monitor(orderid):
+    """Monitor the process"""
     repo = tradingRecordRepo(TRADING_RECORD_DB)
     if orderid == None:
         recordList = repo.get_history_record()
