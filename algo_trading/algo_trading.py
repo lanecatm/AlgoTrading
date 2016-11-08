@@ -16,8 +16,11 @@ sys.path.append("../quant_analysis")
 import TWAPQuantAnalysis
 import VWAPQuantAnalysis
 sys.path.append("../pool")
-import poolFromSinaApi
-
+# import poolFromSinaApi
+import poolFromTushare
+import sqlite3
+sys.path.append("../cli/")
+import dbfile from cl
 
 class algo_trading:
     def __init__(self, ClientOrder):
@@ -32,6 +35,7 @@ class algo_trading:
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         turnover = 0
+        # vwap = 0
         for i in range(len[self.quant_result]):
             tradingTime = tradingTime + self.clientOrder.timeInterval # ??? Define timeinterval --Yi
             stockId = self.clientOrder.stockId
@@ -42,8 +46,17 @@ class algo_trading:
             #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
             outTradingUnit = poolFromTushare.trade_order(inTradingUnit)
             self.resultList.append(outTradingUnit)
+            
             turnover += outTradingUnit.price * amount
         # Conclude the results and get back to orders in db
+        # update in database
+        conn = sqlite3.connect(dbfile) 
+        cursor = conn.cursor
+        avgprice = turnover/self.clientOrder.amount
+        cursor.execute('update orders set total=?,ap=?,wap=? where id=?',(turnover, avgprice, avgprice, sef.clientOrder.orderId))
+        cursor.close()
+        conn.commit()
+        conn.close()
         
 
     # 获取量化分析结果，没有返回值。
