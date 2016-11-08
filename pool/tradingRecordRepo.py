@@ -1,7 +1,7 @@
 # -*- encoding:utf-8 -*-
 
 # ==============================================================================
-# Filename: saveTradingRecord.py
+# Filename: tradingRecordRepo.py
 # Author: Xiaofu Huang
 # E-mail: lanecatm@sjtu.edu.cn
 # Last modified: 2016-11-07 21:18
@@ -15,7 +15,7 @@ import datetime
 import sqlite3
 sys.path.append("../tool")
 from Log import Log
-class saveTradingRecord:
+class tradingRecordRepo:
     def __init__(self, file_path):
         # here should be abs path when connect db files
         self._file_path = file_path
@@ -48,4 +48,20 @@ class saveTradingRecord:
         cursor = self._connection.execute(statement)
         self._connection.commit()
         cursor.close()
+
+    def get_history_record(self):
+        statement = "SELECT * FROM main.trading_record"
+        cursor = self._connection.execute(statement)
+        self._connection.commit()
+        data = cursor.fetchall()
+        cursor.close()
+        self.log.info("get data:\n" + str(data))
+        tradingRecordList = []
+        for unitData in data:
+            timeToInsert = datetime.datetime.strptime(unitData[7] + unitData[8], "%Y-%m-%d%H:%M:%S")
+            tradingRecord = tradingUnit(unitData[1], unitData[2], unitData[3], unitData[5], unitData[4], unitData[6], timeToInsert )
+            tradingRecordList.append(tradingRecord)
+        return tradingRecordList
+
+
  
