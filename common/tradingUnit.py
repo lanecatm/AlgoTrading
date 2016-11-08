@@ -7,7 +7,7 @@
 # Last modified: 2016-11-06 10:06
 # Description: 交易结构体
 # ==============================================================================
-
+import datetime
 class tradingUnit:
     # attribute: buy True, sell False
     def __init__(self, orderId, stockId, buysell, amount, price, isSuccess, time):
@@ -18,4 +18,6 @@ class tradingUnit:
         self.isSuccess = isSuccess
         self.price = price
         self.orderId = orderId
+    def toString(self):
+        return "time " + self.time.strftime("%Y-%m-%d %H:%M:%S") + " stockId " + str(self.stockId) + " amount " + str(self.amount) + " buysell " + str(self.buysell) + " isSucc " + str(self.isSuccess) + " price " + str(self.price) + "orderid " + str(self.orderId)
 
