@@ -22,13 +22,18 @@ import sqlite3
 sys.path.append("../cli/")
 #from cli import dbfile
 dbfile = 'test_0.1.db'
-#from datetime import datetime
 import datetime
 from tradingRecordRepo import tradingRecordRepo
 
+import numpy as np
 class mockMarketDataGetter:
     def get_data(self):
         return 20.0, 100
+class repoTest:
+    def get_amount(self, startDate, endDate, startTime, endTime):
+        print startDate, endDate, startTime, endTime
+        return np.array([[1, 2, 3, 4]] * 20)
+repoEngine = repoTest()
 
 class algo_trading:
     def __init__(self, ClientOrder):
@@ -47,8 +52,6 @@ class algo_trading:
         marketGetter = mockMarketDataGetter()
         saveEngine = tradingRecordRepo("test_trading_record.db")
         pool = poolFromTushare(marketGetter, saveEngine)
-
-        # vwap = 0
         for i in range(len(self.quant_result)):
             tradingTime = tradingTime + datetime.timedelta(minutes=1)
             stockId = self.clientOrder.stockId
@@ -74,11 +77,10 @@ class algo_trading:
 
     # 获取量化分析结果，没有返回值。
     def getQuantAnalysisResult(self):
-        self.quant_analysis = TWAPQuantAnalysis()
         if self.clientOrder.algChoice == "twap":
             self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
-            self.quant_analysis = TWAPQuantAnalysis()
+            self.quant_analysis = VWAPQuantAnalysis(repoEngine)
         self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
