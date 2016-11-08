@@ -49,8 +49,11 @@ class tradingRecordRepo:
         self._connection.commit()
         cursor.close()
 
-    def get_history_record(self):
-        statement = "SELECT * FROM main.trading_record"
+    def get_history_record(self, orderId = None):
+        if orderId == None:
+            statement = "SELECT * FROM main.trading_record"
+        else:
+            statement = "SELECT * FROM main.trading_record WHERE ORDERID = " + str(orderId)
         cursor = self._connection.execute(statement)
         self._connection.commit()
         data = cursor.fetchall()
