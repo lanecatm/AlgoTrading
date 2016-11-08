@@ -41,6 +41,8 @@ class tradingRecordRepo:
         self._connection.close()
 
     def save_record(self, tradingRecord):
+        self.log.info(tradingRecord.time.strftime("%H:%M:%S"))
+        self.log.info(tradingRecord.toString())
         statement = "INSERT INTO main.trading_record VALUES(NULL,"\
                 + str(tradingRecord.orderId) + ", "\
                 + str(tradingRecord.stockId) + ", "\
@@ -50,7 +52,8 @@ class tradingRecordRepo:
                 + str((int)(tradingRecord.isSuccess)) + ", "\
                 + "\"" + tradingRecord.time.strftime("%Y-%m-%d") + "\", "\
                 + "\"" + tradingRecord.time.strftime("%H:%M:%S") + "\")"
-        #self.log.info("statement: " + statement)
+        self.log.info("statement: " + statement)
+
         cursor = self._connection.execute(statement)
         self._connection.commit()
         cursor.close()

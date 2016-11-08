@@ -12,13 +12,17 @@ Created on Sat Nov  5 20:03:16 2016
 @author: Panh
 """
 
-import pymysql
+#import pymysql
+import MySQLdb as pymysql
 import calendar
 import numpy as np
 
+IPADDRESS = "192.168.191.1"
+USER = "client"
+PASSWORD = "123456"
 class fetchStockMinuData(object):     
     def __init__(self):
-        self.conn = pymysql.connect(host = "localhost", user = "root", passwd = "haopan09", port = 3306, charset = 'utf8',  db = 'stockamount')
+        self.conn = pymysql.connect(host = IPADDRESS, user = USER, passwd = PASSWORD, port = 3306, charset = 'utf8',  db = 'stockamount')
         self.cur = self.conn.cursor()
 
     def getDateLength(self,year):
@@ -97,8 +101,8 @@ class fetchStockMinuData(object):
                         
         totalFilterDate = totalFilterDate + ")"
         
-        print (datenumber)
-        print (totalFilterDate)
+        #print (datenumber)
+        #print (totalFilterDate)
         return datenumber,totalFilterDate,totalFilterDateList
     
     
@@ -127,8 +131,8 @@ class fetchStockMinuData(object):
         
         totalFilterMinu = totalFilterMinu + ")"
         
-        print (minutenumber)
-        print (totalFilterMinu)
+        #print (minutenumber)
+        #print (totalFilterMinu)
         return minutenumber, totalFilterMinu
 
     
@@ -137,12 +141,12 @@ class fetchStockMinuData(object):
     
         self.cur.execute(SQL)
         results = self.cur.fetchall()   
-        print (results)
+        #print (results)
         
-        startDate = "2016-10-20" #smaller
-        endDate = "2016-10-24"  #bigger
-        startTime = "13'00"  #smaller
-        endTime = "14'59"  #bigger
+        #startDate = "2016-10-20" #smaller
+        #endDate = "2016-10-24"  #bigger
+        #startTime = "13'00"  #smaller
+        #endTime = "14'59"  #bigger
         
         dateNumber, totalFilterDate, totalFilterDateList = self.getTotalDateString(startDate, endDate)
         minuteNumber, totalFilterMinute = self.getTotalMinuteString(startTime, endTime)
@@ -151,22 +155,23 @@ class fetchStockMinuData(object):
         resultsArray = np.zeros((dateNumber,minuteNumber)) 
         resultsArray = resultsArray.astype(np.str)      
            
-        print ("---------------------------------------------------------------------------")
+        #print ("---------------------------------------------------------------------------")
         for dateIndex in range(len(totalFilterDateList)):
         #index = 0
         #SQL = """select date_tick,minu_tick,amou_tick from stockdata WHERE code_tick like "600000" AND date_tick in """+totalFilterDate +""" AND minu_tick in """ + totalFilterMinute
             SQL = """select date_tick,minu_tick,pric_tick, amou_tick from tickdata WHERE code_tick like "600000" AND date_tick like """+ totalFilterDateList[dateIndex] +""" AND minu_tick in """ + totalFilterMinute    
             self.cur.execute(SQL)
             results = self.cur.fetchall()   
-            print (results)
-            print (len(results))
+            #print (results)
+            #print (len(results))
             if(results!=()): #
                 for minuIndex in range(len(results)):
                 #for minuIndex in range(minuteNumber):
                     tmpstring = results[minuIndex][0] + " "+results[minuIndex][1]+" "+ str(results[minuIndex][2])+" "+str(results[minuIndex][3])
                     resultsArray[dateIndex][minuIndex] = tmpstring
         
-        print (resultsArray)
+        #print (resultsArray)
+        return resultsArray
     
 
 
