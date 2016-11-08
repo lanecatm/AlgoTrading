@@ -61,7 +61,6 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
     	endtime = '15:00:00'
     start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
     end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
-    print str(end_t-start_t)
     # store into database
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor() 
@@ -128,7 +127,7 @@ def run():
                 buysell = True
             else:
                 buysell = False 
-            orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),row[5],row[6],buysell,1,1))
+            orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),row[5],buysell,row[6],1,1))
     	#pass to algo trading
     singletrade = algo_trading(orderlist[0])
     singletrade.getQuantAnalysisResult()
@@ -159,7 +158,7 @@ def showresult(orderid, stockid):
     	# click.echo() all
     	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
     values = cursor.fetchall()
-    click.echo('OID\tB/S\tStock\tAmt\tTO\tAP\tAlg\tWAP')
+    click.echo('OID\tB/S\tStock\tAmt\tTO\t\tAP\tAlg\tWAP')
     #print values
     for row in values:
     	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[3])+'\t'+str(row[5])+'\t'+str(row[6])+'\t'+str(row[4])+'\t'+str(row[7]))

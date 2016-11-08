@@ -38,6 +38,7 @@ class algo_trading:
     def setParam(self, CO):
         self.clientOrder = CO
 
+
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
     def tradeRequest(self):
         self.resultList = []
@@ -54,7 +55,6 @@ class algo_trading:
             amount = self.clientOrder.stockAmount * self.quant_result[i] # waht if  小数
             buysell = self.clientOrder.buysell
             inTradingUnit = tradingUnit(self.clientOrder.orderId, stockId, buysell, amount, None, None, tradingTime)
-
             # 执行 pool 交易
             #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
             outTradingUnit = pool.trade_order(inTradingUnit)
@@ -66,7 +66,7 @@ class algo_trading:
         conn = sqlite3.connect(dbfile)
         cursor = conn.cursor()
         avgprice = turnover/self.clientOrder.stockAmount
-        cursor.execute('update orders set total=?,ap=?,wap=? where id=?',(turnover, avgprice, avgprice, self.clientOrder.orderId))
+        cursor.execute('update orders set total=?,ap=?,wap=?,status=2 where id=?',(turnover, avgprice, avgprice, self.clientOrder.orderId))
         cursor.close()
         conn.commit()
         conn.close()
@@ -78,7 +78,7 @@ class algo_trading:
         if self.clientOrder.algChoice == "twap":
             self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
-            self.quant_analysis = VWAPQuantAnalysis()
+            self.quant_analysis = TWAPQuantAnalysis()
         self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
