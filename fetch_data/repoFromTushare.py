@@ -13,7 +13,7 @@ import datetime
 import numpy as np
 sys.path.append("../tool")
 from Log import Log
-from clientFetchData import fetchStockMinuData
+from clientFetchData_old import fetchStockMinuData
 class repoFromTushare:
     def __init__(self):
         self.repoTushare = fetchStockMinuData()
@@ -21,10 +21,13 @@ class repoFromTushare:
 
     def get_amount(self, startDate, endDate, startTime, endTime):
         # 这里endDate大, startDate小
-        importStartDate = str(endDate.tm_year) + "-" + str(endDate.tm_mon) + "-" + str(endDate.tm_mday)
-        importEndDate = str(startDate.tm_year) + "-" + str(startDate.tm_mon) + "-" + str(startDate.tm_mday)
-        importEndTime = str(endTime.tm_hour) + "'" + str(endTime.tm_min)
-        importStartTime = str(startTime.tm_hour) + "'" + str(startTime.tm_min)
+        self.log.info(str(endDate))
+        self.log.info(str(startTime))
+        importStartDate = endDate.strftime("%Y-%m-%d")
+        importEndDate = startDate.strftime("%Y-%m-%d")
+        importEndTime = endTime.strftime("%H'%M")
+        importStartTime = startTime.strftime("%H'%M")
         self.log.info(importStartDate + " " + importEndDate + " " + importStartTime + " " + importEndTime)
         ansArr = self.repoTushare.fetchData(importStartDate, importEndDate, importStartTime, importEndTime)
-        self.log.info(str(ansArr))
+        self.log.info("ans: \n" + str(ansArr))
+        return ansArr
