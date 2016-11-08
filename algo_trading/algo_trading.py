@@ -64,9 +64,9 @@ class algo_trading:
         # Conclude the results and get back to orders in db
         # update in database
         conn = sqlite3.connect(dbfile)
-        cursor = conn.cursor
-        avgprice = turnover/self.clientOrder.amount
-        cursor.execute('update orders set total=?,ap=?,wap=? where id=?',(turnover, avgprice, avgprice, sef.clientOrder.orderId))
+        cursor = conn.cursor()
+        avgprice = turnover/self.clientOrder.stockAmount
+        cursor.execute('update orders set total=?,ap=?,wap=? where id=?',(turnover, avgprice, avgprice, self.clientOrder.orderId))
         cursor.close()
         conn.commit()
         conn.close()
