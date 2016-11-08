@@ -14,6 +14,7 @@ class TWAPQuantAnalysis(quantAnalysisBase):
     def getRecommendOrderWeight(self, startTime, endTime, timeInterval):
         ansWeightList = []
         tradingTimes = (endTime - startTime)/timeInterval
+        tradingTimes = (tradingTimes.seconds)/60
         weight = 1.0 / tradingTimes         
         ansWeightList = [weight] * tradingTimes
         return ansWeightList

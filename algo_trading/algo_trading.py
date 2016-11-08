@@ -13,8 +13,8 @@ import clientOrder
 import orderResult
 import tradingUnit
 sys.path.append("../quant_analysis")
-import TWAPQuantAnalysis
-import VWAPQuantAnalysis
+from TWAPQuantAnalysis import TWAPQuantAnalysis
+from VWAPQuantAnalysis import VWAPQuantAnalysis
 sys.path.append("../pool")
 # import poolFromSinaApi
 import poolFromTushare
@@ -22,6 +22,8 @@ import sqlite3
 sys.path.append("../cli/")
 #from cli import dbfile
 dbfile = 'test_0.1.db'
+#from datetime import datetime
+import datetime
 
 class algo_trading:
     def __init__(self, ClientOrder):
@@ -36,9 +38,10 @@ class algo_trading:
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         turnover = 0
+        #timeInterval = datetime.timede('0:1:0','%H:%M:%S')
         # vwap = 0
-        for i in range(len[self.quant_result]):
-            tradingTime = tradingTime + self.clientOrder.timeInterval # ??? Define timeinterval --Yi
+        for i in range(len(self.quant_result)):
+            tradingTime = tradingTime + datetime.timedelta(minutes=1)
             stockId = self.clientOrder.stockId
             amount = self.clientOrder.stockAmount * self.quant_result[i] # waht if  小数
             buysell = self.clientOrder.buysell
@@ -62,11 +65,12 @@ class algo_trading:
 
     # 获取量化分析结果，没有返回值。
     def getQuantAnalysisResult(self):
+        self.quant_analysis = TWAPQuantAnalysis()
         if self.clientOrder.algChoice == "twap":
-            quant_analysis = TWAPQuantAnalysis()
+            self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
-            quant_analysis = VWAPQuantAnalysis()
-        self.quant_result = quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
+            self.quant_analysis = VWAPQuantAnalysis()
+        self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
 
