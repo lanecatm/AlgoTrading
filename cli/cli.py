@@ -9,7 +9,9 @@
 import click
 import sys
 sys.path.insert(0, '../common/')
+sys.path.insert(0, '../algo_trading')
 from clientOrder import clientOrder
+import algo_trading
 from datetime import datetime
 import sqlite3
 
@@ -58,7 +60,7 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
 	# store into database
 	conn = sqlite3.connect(dbfile)
 	cursor = conn.cursor() 
-	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg, status, total) values (?,?,?,?,?,?,0,0)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
+	cursor.execute(r'insert into orders (buysell, stockid, start, end, amount, alg, status) values (?,?,?,?,?,?,0)',(buysell, stockid, str(start_t), str(end_t), str(amount), alg))
 	# click.echo() cursor.lastrowid
 	cursor.close()
 	conn.commit()
@@ -119,6 +121,9 @@ def run():
 	for row in values:
 		orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S'),row[3],row[6],row[1],1,1))
 		#pass to algo trading
+	singletrade = algo_trading(orderlist[0])
+	singletrade.getQuantAnalysisResult()
+	singletrade.tradeRequest()
 	cursor.execute('update orders set status=1 where status=0')
 	cursor.close()
 	conn.commit()
