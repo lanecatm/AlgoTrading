@@ -15,19 +15,20 @@ import tradingUnit
 sys.path.append("../quant_analysis")
 import TWAPQuantAnalysis
 import VWAPQuantAnalysis
+sys.path.append("..pool")
+import poolFromSinaApi
 
 
 class algo_trading:
-    def __init__(self):
-        # 默认参数
-        self.clientOrder = clientOrder(10000, 601006, 2016-11-03, 2016-11-04, 1000, True, "TWAP", 60)
+    def __init__(self, ClientOrder):
+        self.setParam(ClientOrder)
 
     # 设置交易参数，传入一个 clientOrder 类
-    def SetParam(self, CO):
+    def setParam(self, CO):
         self.clientOrder = CO
 
-    # 根据订单通过不同策略执行交易，返回各时间点交易信息的list
-    def TradeReques(self):
+    # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
+    def tradeReques(self):
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         for i in range(len[self.quant_result]):
@@ -35,12 +36,14 @@ class algo_trading:
             stockId = self.clientOrder.stockId
             amount = self.clientOrder.stockAmount * self.quant_result[i]
             buysell = self.clientOrder.buysell
-            unit = tradingUnit(tradingTime, stockId, amount, None, None, buysell)
-            self.resultList.append(unit)
+            inTradingUnit = tradingUnit(tradingTime, stockId, amount, buysell, None, None, buysell)
+            # 执行 pool 交易
+            outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
+            self.resultList.append(outTradingUnit)
         return self.resultList
 
-    # 获取量化分析结果
-    def GetQuantAnalysisResult(self):
+    # 获取量化分析结果，没有返回值。
+    def getQuantAnalysisResult(self):
         if self.clientOrder.algChoice == "twap":
             quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":

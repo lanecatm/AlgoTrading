@@ -29,42 +29,29 @@ class poolFromSinaApi:
     # 判断这一单的执行情况
     def trade_order(self, tradingUnit):
         marketData = self.__get_market_trading_data()
-        if tradingUnit.buysell == True:
-            # buy
-            # 如果符合卖1卖2...查找下去
-            nowTradingList = []
-            nowLeftAmount = tradingUnit.amount
-            for i in range(0, 5):
-                nowTradingUnit = copy.deepcopy(tradingUnit)
+        nowTradingList = []
+        nowLeftAmount = tradingUnit.amount
+
+        # 查询买1~买5/卖1~卖5
+        for i in range(0, 5):
+            nowTradingUnit = copy.deepcopy(tradingUnit)
+            # 若是买入，把 price 和 marketAmount 设为买入量和买入价格，否则设为卖出量和卖出价格
+            if nowTradingUnit.buysell == True:
                 nowTradingUnit.price = marketData.sellPrice[i]
-                nowTradingUnit.isSuccess = True
-                if nowLeftAmount <= marketData.sellAmount[i]:
-                    nowTradingUnit.amount = nowLeftAmount
-                    nowLeftAmount = 0
-                    nowTradingList.append(nowTradingUnit)
-                    break
-                else:
-                    nowTradingUnit.amount = marketData.sellAmount[i]
-                    nowLeftAmount = nowLeftAmount - marketData.sellAmount[i]
-                    nowTradingList.append(nowTradingUnit)
-        else:
-            # sell
-            # 如果符合买一买二...查找下去
-            nowTradingList = []
-            nowLeftAmount = tradingUnit.amount
-            for i in range(0, 5):
-                nowTradingUnit = copy.deepcopy(tradingUnit)
+                marketAmount = marketData.sellAmount[i]
+            else:
                 nowTradingUnit.price = marketData.buyPrice[i]
+                marketAmount = marketData.buyAmount[i]
+            # 若可买入/卖出的量大于nowleftAmount，则完成交易，否则向下查询买/卖家不断买入/卖出。
+            if nowLeftAmount <= marketAmount:
+                nowTradingUnit.amount = nowLeftAmount
+                nowLeftAmount = 0
                 nowTradingList.append(nowTradingUnit)
-                if nowLeftAmount <= marketData.buyAmount[i]:
-                        nowTradingUnit.amount = nowLeftAmount
-                        nowLeftAmount = 0
-                        nowTradingList.append(nowTradingUnit)
-                        break
-                else:
-                    nowTradingUnit.amount = marketData.buyAmount[i]
-                    nowLeftAmount = nowLeftAmount - marketData.buyAmount[i]
-                    nowTradingList.append(nowTradingUnit)
+                break
+            else:
+                nowTradingUnit.amount = tradingUnit.price[i]
+                nowLeftAmount = nowLeftAmount - marketAmount
+                nowTradingList.append(nowTradingUnit)
 
         # 把买1买2的子订单合成总订单
         succAmount = 0
