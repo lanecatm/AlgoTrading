@@ -15,7 +15,7 @@ import tradingUnit
 sys.path.append("../quant_analysis")
 import TWAPQuantAnalysis
 import VWAPQuantAnalysis
-sys.path.append("..pool")
+sys.path.append("../pool")
 import poolFromSinaApi
 
 
@@ -31,16 +31,20 @@ class algo_trading:
     def tradeRequest(self):
         self.resultList = []
         tradingTime = self.clientOrder.startTime
+        turnover = 0
         for i in range(len[self.quant_result]):
-            tradingTime = tradingTime + self.clientOrder.timeInterval
+            tradingTime = tradingTime + self.clientOrder.timeInterval # ??? Define timeinterval --Yi
             stockId = self.clientOrder.stockId
-            amount = self.clientOrder.stockAmount * self.quant_result[i]
+            amount = self.clientOrder.stockAmount * self.quant_result[i] # waht if  小数
             buysell = self.clientOrder.buysell
-            inTradingUnit = tradingUnit(tradingTime, stockId, amount, buysell, None, None, buysell)
+            inTradingUnit = tradingUnit(tradingTime, stockId, amount, buysell, None, None, self.clientOrder.orderId)
             # 执行 pool 交易
-            outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
+            #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
+            outTradingUnit = poolFromTushare.trade_order(inTradingUnit)
             self.resultList.append(outTradingUnit)
-        return self.resultList
+            turnover += outTradingUnit.price * amount
+        # Conclude the results and get back to orders in db
+        
 
     # 获取量化分析结果，没有返回值。
     def getQuantAnalysisResult(self):
