@@ -13,7 +13,7 @@ sys.path.append("../common/")
 import MarketData
 from tradingUnit import tradingUnit
 import copy
-from saveTradingRecord import saveTradingRecord
+from tradingRecordRepo import tradingRecordRepo
 
 class poolFromTushare:
     def __init__(self, marketDataGetter, saveEngine):
