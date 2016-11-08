@@ -11,7 +11,7 @@ import sys
 sys.path.append('../common/')
 sys.path.append('../algo_trading')
 from clientOrder import clientOrder
-import algo_trading
+from algo_trading import algo_trading
 from datetime import datetime
 import sqlite3
 sys.path.append("../pool")
