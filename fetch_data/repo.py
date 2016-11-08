@@ -8,9 +8,12 @@
 # Description: Put data into data base
 # ==============================================================================
 
+import sys, os
 import sqlite3
 import time
 import numpy as np
+sys.path.append("../tool")
+from Log import Log
 class repo:
     def __init__(self, file_path):
         # here should be abs path when connect db files
@@ -18,8 +21,12 @@ class repo:
         file_path_list = file_path.split('.')
         file_path_list[-1] = 'db'
         self._db_file_path = '.'.join(file_path_list)
+        self.log = Log()
         #print self._db_file_path
-        self._connection = sqlite3.connect(self._db_file_path)
+        filename = sys._getframe().f_code.co_filename
+        filePath = os.path.realpath(filename).rsplit('/', 1)[0]
+        self.log.info("file path: " + filePath)
+        self._connection = sqlite3.connect(filePath + "/"+ self._db_file_path)
 
 
     def __del__(self):
