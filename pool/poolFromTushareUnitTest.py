@@ -9,7 +9,7 @@
 # ==============================================================================
 import datetime
 from poolFromTushare import poolFromTushare
-from saveTradingRecord import saveTradingRecord
+from tradingRecordRepo import tradingRecordRepo
 import sys
 sys.path.append("../tool")
 from Log import Log
@@ -22,7 +22,7 @@ class mockMarketDataGetter:
 if __name__ == "__main__":
     log = Log()
     marketGetter = mockMarketDataGetter()
-    saveEngine = saveTradingRecord("test_trading_record.db")
+    saveEngine = tradingRecordRepo("test_trading_record.db")
     tradingRecord = tradingUnit(orderId = 0, stockId = 0, buysell = False, amount = 1000, price = None, isSuccess = False,time = datetime.datetime.now())
     log.info(str(tradingRecord))
     pool = poolFromTushare(marketGetter, saveEngine)
