@@ -8,16 +8,21 @@
 
 import click
 import sys
-sys.path.insert(0, '../common/')
-sys.path.insert(0, '../algo_trading')
+sys.path.append('../common/')
+sys.path.append('../algo_trading')
 from clientOrder import clientOrder
 import algo_trading
 from datetime import datetime
 import sqlite3
+sys.path.append("../pool")
+from tradingRecordRepo import tradingRecordRepo
+from tradingUnit import tradingUnit
 
 
 
 dbfile = 'test_0.1.db'
+TRADING_RECORD_DB = 'test_trading_record.db'
+#TRADING_RECORD_DB = 'trading_record'
 
 
 @click.group()
@@ -92,7 +97,7 @@ def showorder(orderid, stockid, sql):
     	# click.echo() all
     	cursor.execute('select * from orders')
     values = cursor.fetchall()
-    click.echo(' \tB/S\tStock\tAmt\tStart Time\t\tEnd Time\t\tAlg.\tStaus')
+    click.echo('OID\tB/S\tStock\tAmt\tStart Time\t\tEnd Time\t\tAlg.\tStaus')
     for row in values:
     	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[5])+'\t'+row[3]+'\t'+row[4]+'\t'+row[6]+'\t'+str(row[7]))
     cursor.close()
@@ -123,7 +128,7 @@ def run():
                 buysell = True
             else:
                 buysell = False 
-            orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S'),row[3],row[6],buysell,datetime.strptime(row[5], '%Y-%m-%d %H:%M:%S')-datetime.strptime(row[4],'%Y-%m-%d %H:%M:%S'),1))
+            orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),row[5],row[6],buysell,1,1))
     	#pass to algo trading
     singletrade = algo_trading(orderlist[0])
     singletrade.getQuantAnalysisResult()
@@ -154,19 +159,34 @@ def showresult(orderid, stockid):
     	# click.echo() all
     	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
     values = cursor.fetchall()
-    click.echo('   B/S   Stock   Amt  Tuneover AP  Alg  WAP')
+    click.echo('OID\tB/S\tStock\tAmt\tTO\tAP\tAlg\tWAP')
     #print values
     for row in values:
-    	click.echo(str(row[0])+'  '+row[1]+'  '+row[2]+'  '+str(row[3])+'  '+str(row[5])+'  '+str(row[6])+'  '+str(row[4])+'  '+str(row[7]))
+    	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[3])+'\t'+str(row[5])+'\t'+str(row[6])+'\t'+str(row[4])+'\t'+str(row[7]))
     cursor.close()
     conn.close()
 
+@click.command()
+@click.option('--orderid', help='The ID of the order you want to show')
+def monitor(orderid):
+    repo = tradingRecordRepo(TRADING_RECORD_DB)
+    if orderid == None:
+        recordList = repo.get_history_record()
+    else:
+        recordList = repo.get_history_record(orderid)
+
+    click.echo('Order\tStock\tBuyOrSell\tPrice\tNumber\tTime\t')
+    for row in recordList:
+        click.echo(str(row.orderId)+'\t'+str(row.stockId)+'\t'+str(row.buysell)+'\t\t'+str(row.price)+'\t'+str(row.amount)+'\t'+ row.time.strftime("%Y-%m-%d %H:%M:%S"))
+
+ 
 cli.add_command(initdb)
 cli.add_command(placeorder)
 cli.add_command(showorder)
 cli.add_command(deleteorder)
 cli.add_command(run)
 cli.add_command(showresult)
+cli.add_command(monitor)
 
 if __name__ == "__main__":
     cli()
