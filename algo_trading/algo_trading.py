@@ -20,7 +20,8 @@ sys.path.append("../pool")
 import poolFromTushare
 import sqlite3
 sys.path.append("../cli/")
-from cli import dbfile
+#from cli import dbfile
+dbfile = 'test_0.1.db'
 
 class algo_trading:
     def __init__(self, ClientOrder):
