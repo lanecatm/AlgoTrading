@@ -137,6 +137,7 @@ class fetchStockMinuData(object):
 
     
     def fetchData(self, startDate, endDate, startTime, endTime):          
+        print startDate, endDate, startTime, endTime
         SQL = """select date_tick,minu_tick,pric_tick, volu_tick from tickdata WHERE code_tick like "600000" AND date_tick in ("2013-10-24" , "2013-10-23") AND minu_tick in ("09'43" , "09'00")"""
     
         self.cur.execute(SQL)
@@ -160,6 +161,7 @@ class fetchStockMinuData(object):
         #index = 0
         #SQL = """select date_tick,minu_tick,amou_tick from stockdata WHERE code_tick like "600000" AND date_tick in """+totalFilterDate +""" AND minu_tick in """ + totalFilterMinute
             SQL = """select date_tick,minu_tick,pric_tick, amou_tick from tickdata WHERE code_tick like "600000" AND date_tick like """+ totalFilterDateList[dateIndex] +""" AND minu_tick in """ + totalFilterMinute    
+            print SQL
             self.cur.execute(SQL)
             results = self.cur.fetchall()   
             #print (results)
