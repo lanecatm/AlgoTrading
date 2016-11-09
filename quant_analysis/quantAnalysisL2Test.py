@@ -25,4 +25,4 @@ if __name__ == '__main__':
 
     VWAPAnalysis.getRecommendOrderWeight(startDate, endDate, 1)
     
-    VWAPAnalysis.getRecommendOrderWeight(startDate, startDate + datetime.timedelta(hours = 10), 1)
+    #VWAPAnalysis.getRecommendOrderWeight(startDate, startDate + datetime.timedelta(hours = 10), 1)
