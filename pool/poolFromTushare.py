@@ -14,6 +14,8 @@ import MarketData
 from tradingUnit import tradingUnit
 import copy
 from tradingRecordRepo import tradingRecordRepo
+sys.path.append("../fetch_data")
+import repoFromTushare
 
 class poolFromTushare:
     def __init__(self, marketDataGetter, saveEngine):
@@ -23,7 +25,7 @@ class poolFromTushare:
     
     def get_market_trading_data(self, time):
         # TODO 连上数据库
-        price, amount = self.marketDataGetter.get_data()
+        price, amount = self.marketDataGetter.get_single_data(time.date(), time.time())
         return price, amount
 
     def trade_order(self, tradingUnit):
