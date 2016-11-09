@@ -158,7 +158,7 @@ def showresult(orderid, stockid):
     	# click.echo() all
     	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
     values = cursor.fetchall()
-    click.echo('OID\tB/S\tStock\tAmt\tTO\t\tAP\tAlg\tWAP')
+    click.echo('OID\tB/S\tStock\tAmt\tTurnover\tAvg. Price\tAlg\tWAP')
     #print values
     for row in values:
     	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[3])+'\t'+str(row[5])+'\t'+str(row[6])+'\t'+str(row[4])+'\t'+str(row[7]))

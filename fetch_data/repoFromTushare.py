@@ -97,7 +97,7 @@ class repoFromTushare(object):
         resultsarray = resultsarray.astype(np.float)      
 
         for dateindex in range(len(totalfilterdatelist)):
-            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute    
+            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute + "  ORDER BY minu_tick asc"
             self.log.info(sql)
             self.cur.execute(sql)
             results = self.cur.fetchall()   

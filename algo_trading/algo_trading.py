@@ -29,16 +29,35 @@ from repoFromTushare import repoFromTushare
 
 import numpy as np
 
+sys.path.append("../tool")
+from Log import Log
+
 class algo_trading:
     def __init__(self, ClientOrder):
         self.setParam(ClientOrder)
         self.marketGetter = repoFromTushare()
         self.saveEngine = tradingRecordRepo("test_trading_record.db")
         self.pool = poolFromTushare(self.marketGetter, self.saveEngine)
+        self.log = Log()
 
     # 设置交易参数，传入一个 clientOrder 类
     def setParam(self, CO):
         self.clientOrder = CO
+
+    def getVwapActual(self, startTime, endTime):
+        self.log.info("start time and end time:" + str(startTime) + " " + str(endTime))
+        marketGetter = repoFromTushare()
+        day = datetime.timedelta(days = 1)
+        priceArray = marketGetter.get_price(startTime.date(), endTime.date() - day, startTime.time(), endTime.time())
+        amountArray = marketGetter.get_amount(startTime.date(), endTime.date() - day, startTime.time(), endTime.time())
+        sumArray = priceArray * amountArray
+        self.log.info("vwap actual :\n" + str(sumArray))
+        ansPrice = np.sum(sumArray) / np.sum(amountArray)
+        self.log.info("vwap price:" + str(ansPrice))
+        return ansPrice
+
+
+
 
 
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
@@ -58,12 +77,14 @@ class algo_trading:
             self.resultList.append(outTradingUnit)
             
             turnover += outTradingUnit.price * amount
+        actualprice = self.getVwapActual(self.clientOrder.startTime, self.clientOrder.endTime)
         # Conclude the results and get back to orders in db
         # update in database
+        
         conn = sqlite3.connect(dbfile)
         cursor = conn.cursor()
         avgprice = turnover/self.clientOrder.stockAmount
-        cursor.execute('update orders set total=?,ap=?,wap=?,status=2 where id=?',(turnover, avgprice, avgprice, self.clientOrder.orderId))
+        cursor.execute('update orders set total=?,ap=?,wap=?,status=2 where id=?',(turnover, avgprice, actualprice, self.clientOrder.orderId))
         cursor.close()
         conn.commit()
         conn.close()
