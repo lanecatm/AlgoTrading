@@ -24,20 +24,17 @@ sys.path.append("../cli/")
 dbfile = 'test_0.1.db'
 import datetime
 from tradingRecordRepo import tradingRecordRepo
+sys.path.append("../fetch_data")
+from repoFromTushare import repoFromTushare
 
 import numpy as np
-class mockMarketDataGetter:
-    def get_data(self):
-        return 20.0, 100
-class repoTest:
-    def get_amount(self, startDate, endDate, startTime, endTime):
-        print startDate, endDate, startTime, endTime
-        return np.array([[1, 2, 3, 4]] * 20)
-repoEngine = repoTest()
 
 class algo_trading:
     def __init__(self, ClientOrder):
         self.setParam(ClientOrder)
+        self.marketGetter = repoFromTushare()
+        self.saveEngine = tradingRecordRepo("test_trading_record.db")
+        self.pool = poolFromTushare(self.marketGetter, self.saveEngine)
 
     # 设置交易参数，传入一个 clientOrder 类
     def setParam(self, CO):
@@ -49,9 +46,6 @@ class algo_trading:
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         turnover = 0
-        marketGetter = mockMarketDataGetter()
-        saveEngine = tradingRecordRepo("test_trading_record.db")
-        pool = poolFromTushare(marketGetter, saveEngine)
         for i in range(len(self.quant_result)):
             tradingTime = tradingTime + datetime.timedelta(minutes=1)
             stockId = self.clientOrder.stockId
@@ -60,7 +54,7 @@ class algo_trading:
             inTradingUnit = tradingUnit(self.clientOrder.orderId, stockId, buysell, amount, None, None, tradingTime)
             # 执行 pool 交易
             #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
-            outTradingUnit = pool.trade_order(inTradingUnit)
+            outTradingUnit = self.pool.trade_order(inTradingUnit)
             self.resultList.append(outTradingUnit)
             
             turnover += outTradingUnit.price * amount
@@ -80,7 +74,7 @@ class algo_trading:
         if self.clientOrder.algChoice == "twap":
             self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
-            self.quant_analysis = VWAPQuantAnalysis(repoEngine)
+            self.quant_analysis = VWAPQuantAnalysis(self.marketGetter)
         self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
