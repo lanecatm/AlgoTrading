@@ -33,4 +33,5 @@ echo "create table history_stock_info (\
     SELLFIVENUMBER INT,\
     SELLFIVEPRICE DOUBLE,\
     NOWDATE DATE,\
-    NOWTIME TIME);" | sqlite3 $db_path
+    NOWTIME TIME,\
+    INSERTTIME TIME);" | sqlite3 $db_path
