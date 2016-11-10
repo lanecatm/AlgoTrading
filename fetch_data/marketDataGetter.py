@@ -26,8 +26,9 @@ class marketDataGetter:
         return infoArr[:-1]
 
 if __name__=='__main__':
-    infoArr = get_data()
-    database = repo.repo("./test.db")
+    getter = marketDataGetter()
+    infoArr = getter.get_data()
+    database = repo.repo("./again.db")
     database.insert_data(infoArr)
     exit()
 

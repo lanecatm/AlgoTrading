@@ -1,7 +1,7 @@
-db_path=./test.db
+db_path=./again.db
 echo "drop table history_stock_info; " | sqlite3 $db_path
 echo "create table history_stock_info (\
-    ID INT INTEGER PRIMARY KEY,\
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,\
     STOCKNAME TEXT,\
     TODAYOPENPRICE DOUBLE,\
     YESTERDAYCLOSEPRICE DOUBLE,\
