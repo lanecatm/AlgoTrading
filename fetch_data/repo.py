@@ -43,7 +43,8 @@ class repo:
         statement = "INSERT INTO main.history_stock_info VALUES(NULL,"
         for i in range(0, 31):
             statement = statement + infoArr[i] + ","
-        statement = statement + infoArr[31] + ")"
+        statement = statement + infoArr[31] + ", "
+        statement = statement + "datetime('now') )"
         #print statement
         cursor = self._connection.execute(statement)
         self._connection.commit()
