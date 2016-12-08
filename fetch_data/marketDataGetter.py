@@ -10,11 +10,15 @@ class marketDataGetter:
         self.log = Log()
         return
 
-    def get_data(self):
-        url = 'http://hq.sinajs.cn/list=sh601006'
+    # old stock id 601006
+    def get_data(self, stockId):
+        self.log.info("get_data(), input stock id" + stockId)
+        url = 'http://hq.sinajs.cn/list=sh' + stockId
+        self.log.info("request url: " + url)
         req = urllib2.Request(url)
         res_data = urllib2.urlopen(req)
         res = res_data.read()
+        self.log.info("request ans: " + res)
         #print res
         infoStr = res[res.find('"') + 1: -1]
         infoArr = infoStr.split(',')
@@ -26,9 +30,20 @@ class marketDataGetter:
         return infoArr[:-1]
 
 if __name__=='__main__':
+
+    # sys.argv 命令行参数
+    if len(sys.argv) < 3:
+        print "param error, marketDataGetter [db name] [stock id 1] ..."
+        exit()
+    dbName = sys.argv[1]
+    stockIdArr = sys.argv[2:]
+
     getter = marketDataGetter()
-    infoArr = getter.get_data()
-    database = repo.repo("./again.db")
-    database.insert_data(infoArr)
+    database = repo.repo("./" + dbName)
+
+    for stockId in stockIdArr:
+        infoArr = getter.get_data(stockId)
+        infoArr[0] = stockId
+        database.insert_data(infoArr)
     exit()
 
