@@ -37,7 +37,7 @@ class repo:
         self._connection.close()
 
 
-    # 插入抓到的数据
+    # 插入抓到的原始数据
     # @param infoArr [x1, x1, ..., x32]
     def insert_data(self, infoArr):
         statement = "INSERT INTO main.history_stock_info VALUES(NULL,"

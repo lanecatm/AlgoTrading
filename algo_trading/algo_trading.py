@@ -44,6 +44,7 @@ class algo_trading:
     def setParam(self, CO):
         self.clientOrder = CO
 
+    # 获取真实情况下的Vwap值
     def getVwapActual(self, startTime, endTime):
         self.log.info("start time and end time:" + str(startTime) + " " + str(endTime))
         marketGetter = repoFromTushare()
@@ -55,9 +56,6 @@ class algo_trading:
         ansPrice = np.sum(sumArray) / np.sum(amountArray)
         self.log.info("vwap price:" + str(ansPrice))
         return ansPrice
-
-
-
 
 
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
