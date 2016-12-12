@@ -1,4 +1,4 @@
-db_path=./again.db
+db_path=./again_2.db
 echo "drop table history_stock_info; " | sqlite3 $db_path
 echo "create table history_stock_info (\
     ID INTEGER PRIMARY KEY AUTOINCREMENT,\

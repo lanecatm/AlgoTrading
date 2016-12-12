@@ -176,7 +176,7 @@ def monitor(orderid):
 
     click.echo('Order\tStock\tBuyOrSell\tPrice\tNumber\tTime\t')
     for row in recordList:
-        click.echo(str(row.orderId)+'\t'+str(row.stockId)+'\t'+str(row.buysell)+'\t\t'+str(row.price)+'\t'+str(row.amount)+'\t'+ row.time.strftime("%Y-%m-%d %H:%M:%S"))
+        click.echo(str(row.orderId)+'\t'+str(row.stockId)+'\t'+str(row.buysell)+'\t\t'+str(row.price)+'\t'+str((int)(row.amount))+'\t'+ row.time.strftime("%Y-%m-%d %H:%M:%S"))
 
  
 cli.add_command(initdb)
