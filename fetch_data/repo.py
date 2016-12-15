@@ -37,13 +37,14 @@ class repo:
         self._connection.close()
 
 
-    # 插入抓到的数据
+    # 插入抓到的原始数据
     # @param infoArr [x1, x1, ..., x32]
     def insert_data(self, infoArr):
         statement = "INSERT INTO main.history_stock_info VALUES(NULL,"
         for i in range(0, 31):
             statement = statement + infoArr[i] + ","
-        statement = statement + infoArr[31] + ")"
+        statement = statement + infoArr[31] + ", "
+        statement = statement + "datetime('now') )"
         #print statement
         cursor = self._connection.execute(statement)
         self._connection.commit()

@@ -1,5 +1,5 @@
 while :
 do
-    python ./getData.py
-    sleep 60
+    python ./marketDataGetter.py
+    #sleep 60
 done

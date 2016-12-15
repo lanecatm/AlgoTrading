@@ -24,24 +24,38 @@ sys.path.append("../cli/")
 dbfile = 'test_0.1.db'
 import datetime
 from tradingRecordRepo import tradingRecordRepo
+sys.path.append("../fetch_data")
+from repoFromTushare import repoFromTushare
 
 import numpy as np
-class mockMarketDataGetter:
-    def get_data(self):
-        return 20.0, 100
-class repoTest:
-    def get_amount(self, startDate, endDate, startTime, endTime):
-        print startDate, endDate, startTime, endTime
-        return np.array([[1, 2, 3, 4]] * 20)
-repoEngine = repoTest()
+
+sys.path.append("../tool")
+from Log import Log
 
 class algo_trading:
     def __init__(self, ClientOrder):
         self.setParam(ClientOrder)
+        self.marketGetter = repoFromTushare()
+        self.saveEngine = tradingRecordRepo("test_trading_record.db")
+        self.pool = poolFromTushare(self.marketGetter, self.saveEngine)
+        self.log = Log()
 
     # 设置交易参数，传入一个 clientOrder 类
     def setParam(self, CO):
         self.clientOrder = CO
+
+    # 获取真实情况下的Vwap值
+    def getVwapActual(self, startTime, endTime):
+        self.log.info("start time and end time:" + str(startTime) + " " + str(endTime))
+        marketGetter = repoFromTushare()
+        day = datetime.timedelta(days = 1)
+        priceArray = marketGetter.get_price(startTime.date(), endTime.date() - day, startTime.time(), endTime.time())
+        amountArray = marketGetter.get_amount(startTime.date(), endTime.date() - day, startTime.time(), endTime.time())
+        sumArray = priceArray * amountArray
+        self.log.info("vwap actual :\n" + str(sumArray))
+        ansPrice = np.sum(sumArray) / np.sum(amountArray)
+        self.log.info("vwap price:" + str(ansPrice))
+        return ansPrice
 
 
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
@@ -49,9 +63,6 @@ class algo_trading:
         self.resultList = []
         tradingTime = self.clientOrder.startTime
         turnover = 0
-        marketGetter = mockMarketDataGetter()
-        saveEngine = tradingRecordRepo("test_trading_record.db")
-        pool = poolFromTushare(marketGetter, saveEngine)
         for i in range(len(self.quant_result)):
             tradingTime = tradingTime + datetime.timedelta(minutes=1)
             stockId = self.clientOrder.stockId
@@ -60,16 +71,18 @@ class algo_trading:
             inTradingUnit = tradingUnit(self.clientOrder.orderId, stockId, buysell, amount, None, None, tradingTime)
             # 执行 pool 交易
             #outTradingUnit = poolFromSinaApi.trade_order(inTradingUnit)
-            outTradingUnit = pool.trade_order(inTradingUnit)
+            outTradingUnit = self.pool.trade_order(inTradingUnit)
             self.resultList.append(outTradingUnit)
             
             turnover += outTradingUnit.price * amount
+        actualprice = self.getVwapActual(self.clientOrder.startTime, self.clientOrder.endTime)
         # Conclude the results and get back to orders in db
         # update in database
+        
         conn = sqlite3.connect(dbfile)
         cursor = conn.cursor()
         avgprice = turnover/self.clientOrder.stockAmount
-        cursor.execute('update orders set total=?,ap=?,wap=?,status=2 where id=?',(turnover, avgprice, avgprice, self.clientOrder.orderId))
+        cursor.execute('update orders set total=?,ap=?,wap=?,status=2 where id=?',(turnover, avgprice, actualprice, self.clientOrder.orderId))
         cursor.close()
         conn.commit()
         conn.close()
@@ -80,7 +93,7 @@ class algo_trading:
         if self.clientOrder.algChoice == "twap":
             self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
-            self.quant_analysis = VWAPQuantAnalysis(repoEngine)
+            self.quant_analysis = VWAPQuantAnalysis(self.marketGetter)
         self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
                                                       self.clientOrder.timeInterval)
 
