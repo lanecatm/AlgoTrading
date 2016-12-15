@@ -74,12 +74,14 @@ class repoFromTushare(object):
         resultsarray = resultsarray.astype(np.float)      
 
         for dateindex in range(len(totalfilterdatelist)):
-            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute    
+            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute + "  ORDER BY minu_tick asc"
             self.log.info(sql)
             self.cur.execute(sql)
             results = self.cur.fetchall()   
             if(results!=()): #
                 for minuindex in range(len(results)):
+                    self.log.info("get_amount time:" + str(results[minuindex][0:2]))
+                    self.log.info("amount:" + str(results[minuindex][3]))
                     #tmpstring = results[minuindex][0] + " "+results[minuindex][1]+" "+ str(results[minuindex][2])+" "+str(results[minuindex][3])
                     tmpstring = results[minuindex][3]
                     resultsarray[dateindex][minuindex] = tmpstring
@@ -95,7 +97,7 @@ class repoFromTushare(object):
         resultsarray = resultsarray.astype(np.float)      
 
         for dateindex in range(len(totalfilterdatelist)):
-            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute    
+            sql = "select date_tick,minu_tick,pric_tick, amou_tick from tickdata where code_tick like \"600000\" and date_tick like \""+ totalfilterdatelist[dateindex] +"\" and minu_tick in " + totalfilterminute + "  ORDER BY minu_tick asc"
             self.log.info(sql)
             self.cur.execute(sql)
             results = self.cur.fetchall()   
@@ -109,8 +111,8 @@ class repoFromTushare(object):
 
     def get_single_data(self, currentDate, currentMinu):
         currentDate = currentDate.strftime("%Y-%m-%d")
-        currentMinu = datetime.datetime.strptime(currentMinu.strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S").strftime("%H'%m")
-        self.log.info("time: " + currentDate + ", " + currentMinu)
+        currentMinu = datetime.datetime.strptime(currentMinu.strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S").strftime("%H'%M")
+        self.log.info("get_single_data time: " + currentDate + ", " + currentMinu)
         SQL = "select date_tick,minu_tick,pric_tick, volu_tick from tickdata WHERE code_tick like \"600000\" AND date_tick like \"" + currentDate + "\"  AND minu_tick like \"" + currentMinu + "\""
         self.log.info(SQL)
         self.cur.execute(SQL)

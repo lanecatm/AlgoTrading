@@ -16,12 +16,15 @@ import copy
 from tradingRecordRepo import tradingRecordRepo
 sys.path.append("../fetch_data")
 import repoFromTushare
+sys.path.append("../tool")
+from Log import Log
 
 class poolFromTushare:
     def __init__(self, marketDataGetter, saveEngine):
         self.historyTradingList = []
         self.marketDataGetter = marketDataGetter
         self.saveEngine = saveEngine
+        self.log = Log()
     
     def get_market_trading_data(self, time):
         # TODO 连上数据库
@@ -29,6 +32,7 @@ class poolFromTushare:
         return price, amount
 
     def trade_order(self, tradingUnit):
+        self.log.info("trading unit: \n" + str(tradingUnit))
         # 这里完成的是市价单的操作
         # TODO 限价单
         nowTradingUnit = copy.deepcopy(tradingUnit)
