@@ -56,9 +56,9 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
     click.echo('Placing Order...')
     # transfer time format
     if starttime is None:
-    	starttime = '9:00:00'
+        starttime = '9:00:00'
     if endtime is None:
-    	endtime = '15:00:00'
+        endtime = '15:00:00'
     start_t = datetime.strptime(start+' '+starttime, '%Y-%m-%d %H:%M:%S')
     end_t = datetime.strptime(end+' '+endtime, '%Y-%m-%d %H:%M:%S')
     # store into database
@@ -71,7 +71,7 @@ def placeorder(buysell, stockid, start, starttime, end, endtime, amount, alg):
     conn.close()
 
     click.echo(buysell+' '+str(amount)+' share of ['+stockid+'] during '+str(start_t)+' to '+str(end_t)+' using '+alg+' algorithm')
-    
+
 @click.command()
 @click.option('--orderid', help='The ID of the order you want to show')
 @click.option('--stockid', help='The ID of the stock you want to show')
@@ -81,24 +81,24 @@ def showorder(orderid, stockid, sql):
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor()
     if sql != None:
-    	cursor.execute(sql)
+        cursor.execute(sql)
     elif orderid != None:
-    	click.echo('Retrieving order No.'+str(orderid)+'...')
-    	# get it from DB
-    	cursor.execute('select * from orders where id=?',(str(orderid),))
+        click.echo('Retrieving order No.'+str(orderid)+'...')
+        # get it from DB
+        cursor.execute('select * from orders where id=?',(str(orderid),))
     elif stockid != None:
-    	click.echo('Retrieving orders of Stock '+str(stockid)+'...')
-    	# get them from DB
-    	cursor.execute('select * from orders where stockid=?',(str(stockid),))
-    	# cursor.execute('select * from orders where stockid=100100')
+        click.echo('Retrieving orders of Stock '+str(stockid)+'...')
+        # get them from DB
+        cursor.execute('select * from orders where stockid=?',(str(stockid),))
+        # cursor.execute('select * from orders where stockid=100100')
     else:
-    	click.echo('Retrieving all orders...')
-    	# click.echo() all
-    	cursor.execute('select * from orders')
+        click.echo('Retrieving all orders...')
+        # click.echo() all
+        cursor.execute('select * from orders')
     values = cursor.fetchall()
     click.echo('OID\tB/S\tStock\tAmt\tStart Time\t\tEnd Time\t\tAlg.\tStaus')
     for row in values:
-    	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[5])+'\t'+row[3]+'\t'+row[4]+'\t'+row[6]+'\t'+str(row[7]))
+        click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[5])+'\t'+row[3]+'\t'+row[4]+'\t'+row[6]+'\t'+str(row[7]))
     cursor.close()
     conn.close()
 
@@ -112,10 +112,10 @@ def deleteorder(orderid):
     cursor.execute('delete from orders where id=?',(str(orderid),))
     cursor.close()
     conn.commit()
-    conn.close()	
+    conn.close()
 
 @click.command()
-def run():    
+def run():
     """Execute new placed orders"""
     orderlist = []
     conn = sqlite3.connect(dbfile)
@@ -128,7 +128,7 @@ def run():
             else:
                 buysell = False 
             orderlist.append(clientOrder(row[0],row[2],datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S'),datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'),row[5],buysell,row[6],1,1))
-    	#pass to algo trading
+    #pass to algo trading
     singletrade = algo_trading(orderlist[0])
     singletrade.getQuantAnalysisResult()
     singletrade.tradeRequest()
@@ -145,23 +145,23 @@ def showresult(orderid, stockid):
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor()
     if orderid != None:
-    	click.echo('Retrieving result of order No.'+str(orderid)+'...')
-    	# get it from DB
-    	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where id=?',(str(orderid),))
+        click.echo('Retrieving result of order No.'+str(orderid)+'...')
+        # get it from DB
+        cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where id=?',(str(orderid),))
     elif stockid != None:
-    	click.echo('Retrieving results of Stock '+str(stockid)+'...')
-    	# get them from DB
-    	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where stockid=?',(str(stockid),))
-    	# cursor.execute('select * from orders where stockid=100100')
+        click.echo('Retrieving results of Stock '+str(stockid)+'...')
+        # get them from DB
+        cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders where stockid=?',(str(stockid),))
+        # cursor.execute('select * from orders where stockid=100100')
     else:
-    	click.echo('Retrieving all results...')
-    	# click.echo() all
-    	cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
+        click.echo('Retrieving all results...')
+        # click.echo() all
+        cursor.execute('select id,buysell,stockid,amount,alg,total,ap,wap from orders')
     values = cursor.fetchall()
     click.echo('OID\tB/S\tStock\tAmt\tTurnover\tAvg. Price\tAlg\tWAP')
     #print values
     for row in values:
-    	click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[3])+'\t'+str(row[5])+'\t'+str(row[6])+'\t'+str(row[4])+'\t'+str(row[7]))
+        click.echo(str(row[0])+'\t'+row[1]+'\t'+row[2]+'\t'+str(row[3])+'\t'+str(row[5])+'\t'+str(row[6])+'\t'+str(row[4])+'\t'+str(row[7]))
     cursor.close()
     conn.close()
 
@@ -178,7 +178,7 @@ def monitor(orderid):
     for row in recordList:
         click.echo(str(row.orderId)+'\t'+str(row.stockId)+'\t'+str(row.buysell)+'\t\t'+str(row.price)+'\t'+str((int)(row.amount))+'\t'+ row.time.strftime("%Y-%m-%d %H:%M:%S"))
 
- 
+
 cli.add_command(initdb)
 cli.add_command(placeorder)
 cli.add_command(showorder)
