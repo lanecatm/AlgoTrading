@@ -9,8 +9,30 @@
 # ==============================================================================
 from repo import repo
 import time
+import unittest
+
+sys.path.append("../tool")
+from Log import Log
+
+class repoUnitTest(unittest.TestCase):
+
+    def setUp(self):
+        self.log = Log()
+
+    def tearDown(self):
+        pass
+
+    def test_sqlite(self):
+        return
+
+    def test_mysql(self):
+        mysqlRepo = repo()
+        self.assertEqual(0, 0)
+        return
+
+
+
 
 if __name__ == '__main__':
-    repoEngine = repo("test.db")
-    repoEngine.get_amount(time.strptime("2016-11-01", "%Y-%m-%d"),time.strptime("2016-10-31", "%Y-%m-%d"),time.strptime("09:10:00", "%H:%M:%S"),time.strptime("09:13:00", "%H:%M:%S"))
+    unittest.main()
 

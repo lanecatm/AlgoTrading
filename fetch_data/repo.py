@@ -10,11 +10,14 @@
 
 import sys, os
 import sqlite3
+import MySQLdb
 import time
 import numpy as np
 sys.path.append("../tool")
 from Log import Log
 class repo:
+
+    # 初始化为sqlite 数据库
     def __init__(self, file_path):
         # here should be abs path when connect db files
         self._file_path = file_path
@@ -27,6 +30,12 @@ class repo:
         filePath = os.path.realpath(filename).rsplit('/', 1)[0]
         self.log.info("file path: " + filePath)
         self._connection = sqlite3.connect(filePath + "/"+ self._db_file_path)
+
+    # 初始化为mysql 数据库
+    def __init__(self, user, password, ip):
+        if ip==None:
+            db = MySQLdb.connect("localhost", user, password, "history")
+
 
 
     def __del__(self):
@@ -49,6 +58,24 @@ class repo:
         cursor = self._connection.execute(statement)
         self._connection.commit()
         cursor.close()
+
+
+    def change_data_into_mysql(self):
+        # 找到表中最小的时间
+        # 找到表中最大的时间
+        for nowTime in range(startTime, endTime, 60):
+
+            # 每间隔一分钟取出一条数据
+            # 插入mysql中
+
+
+    def get_amount(self):
+        return
+
+    def get_price(self):
+        return
+
+    def get_info(self, datetime)
     
     # 获取股票的成交数量
     # @param startDate dateTime 从哪一天开始(较大的天数，包含)
