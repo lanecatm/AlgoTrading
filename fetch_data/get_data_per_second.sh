@@ -15,7 +15,7 @@ do
         if [ "$curTime" -gt "$startTime" ];then
             if [ "$curTime" -lt "$endTime" ];then
                 echo 'run'$curTime
-                python ./marketDataGetter.py three_stock.db 600000 601006 601377
+                python ./marketDataGetter.py again_2.db 600000 601006 601377
             fi
 
         fi

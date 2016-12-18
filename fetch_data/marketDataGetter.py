@@ -12,13 +12,13 @@ class marketDataGetter:
 
     # old stock id 601006
     def get_data(self, stockId):
-        self.log.info("get_data(), input stock id" + stockId)
+        #self.log.info("get_data(), input stock id" + stockId)
         url = 'http://hq.sinajs.cn/list=sh' + stockId
-        self.log.info("request url: " + url)
+        #self.log.info("request url: " + url)
         req = urllib2.Request(url)
         res_data = urllib2.urlopen(req)
         res = res_data.read()
-        self.log.info("request ans: " + res)
+        #self.log.info("request ans: " + res)
         #print res
         infoStr = res[res.find('"') + 1: -1]
         infoArr = infoStr.split(',')
