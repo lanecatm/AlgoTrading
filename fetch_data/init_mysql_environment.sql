@@ -1,0 +1,45 @@
+drop user if exists "algotrading"@"%"; 
+create user "algotrading"@"%" IDENTIFIED BY "12345678";
+flush privileges;
+
+drop database if exists algotradingDB; 
+create database algotradingDB;
+grant all privileges on algotradingDB.* to algotrading@"%" identified by "12345678";
+flush privileges;
+use algotradingDB;
+drop table if exists history_stock_info;
+create table history_stock_info (
+    ID INT NOT NULL PRIMARY KEY,
+    STOCKID INT,
+    TODAYOPENPRICE DOUBLE,
+    YESTERDAYCLOSEPRICE DOUBLE,
+    NOWPRICE DOUBLE,
+    TODAYHIGHEST DOUBLE,
+    TODAYLOWEST DOUBLE,
+    BUYPRICE DOUBLE,
+    SELLPRICE DOUBLE,
+    SUCCNUM INT,
+    SUCCPRICE INT,
+    BUYONENUMBER INT,
+    BUYONEPRICE DOUBLE,
+    BUYTWONUMBER INT,
+    BUYTWOPRICE DOUBLE,
+    BUYTHREENUMBER INT,
+    BUYTHREEPRICE DOUBLE,
+    BUYFOURNUMBER INT,
+    BUYFOURPRICE DOUBLE,
+    BUYFIVENUMBER INT,
+    BUYFIVEPRICE DOUBLE,
+    SELLONENUMBER INT,
+    SELLONEPRICE DOUBLE,
+    SELLTWONUMBER INT,
+    SELLTWOPRICE DOUBLE,
+    SELLTHREENUMBER INT,
+    SELLTHREEPRICE DOUBLE,
+    SELLFOURNUMBER INT,
+    SELLFOURPRICE DOUBLE,
+    SELLFIVENUMBER INT,
+    SELLFIVEPRICE DOUBLE,
+    NOWDATE DATE,
+    NOWTIME TIME,
+    INSERTTIME DATETIME);
