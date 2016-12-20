@@ -43,3 +43,24 @@ create table history_stock_info (
     NOWDATE DATE,
     NOWTIME TIME,
     INSERTTIME DATETIME);
+drop table if exists client_orders;
+create table client_orders(
+    ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+    STOCKID INT, 
+    STARTTIME DATETIME,
+    ENDTIME DATETIME, 
+    STOCKAMOUNT INT, 
+    BUYSELL INT, 
+    ALGOCHOICE INT, 
+    COMPLETEDAMOUNT INT, 
+    STATUS INT,
+    QUANTANALYSIS MEDIUMTEXT,
+    PROCESSID INT, 
+    UPDATETIME DATETIME);
+
+
+
+
+
+
+
