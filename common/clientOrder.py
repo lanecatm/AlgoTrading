@@ -1,6 +1,8 @@
 class clientOrder(object):
 	# def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, timeInterval, completed, status):
-	def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, completed, status):
+    # buy 0 sell 1
+    # 0 TWAP 1 VWAP
+	def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, completedAmount, status):
 		#super(clientOrder, self).__init__()
 		#super(clientOrder, self).__init__()
 		self.orderId = orderId
@@ -11,5 +13,5 @@ class clientOrder(object):
 		self.buysell = buysell
 		self.algChoice = algChoice
 		# self.timeInterval = timeInterval
-		self.completed = completed # number of shares that have been completed.
+		self.completedAmount = completedAmount # number of shares that have been completed.
 		self.status = status # 0 places, 1 sent, 2 completed

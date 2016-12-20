@@ -24,7 +24,7 @@ class quantAnalysisBase:
         abstract()
         return
 
-    def getHistoryData(self, startTime, endTime, timeInterval, findLastDays = 20):
+    def getHistoryData(self, startTime, endTime, timeInterval, findLastDays = 5):
         # 获取历史数据
         historyDataList = []
         predictList = []

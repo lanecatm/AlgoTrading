@@ -7,8 +7,10 @@
 # Last modified: 2016-10-26 17:05
 # Description: repo单元测试
 # ==============================================================================
+import sys
 from repo import repo
 import time
+import datetime
 import unittest
 
 sys.path.append("../tool")
@@ -23,11 +25,19 @@ class repoUnitTest(unittest.TestCase):
         pass
 
     def test_sqlite(self):
+        sqliteRepo = repo(True, True, "again_2.db", "algotrading", "12345678", None)
+        #sqliteRepo.change_data_into_mysql()
         return
 
     def test_mysql(self):
-        mysqlRepo = repo()
-        self.assertEqual(0, 0)
+        mysqlRepo = repo(False, True , None, "algotrading", "12345678", None)
+
+        startTime = datetime.datetime(2016,12,17,9,30,0)
+        endTime = datetime.datetime(2016,12,14, 10,0,0)
+        data = mysqlRepo.get_amount(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
+        self.log.info(str(data))
+        data = mysqlRepo.get_price(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
+        self.log.info(str(data))
         return
 
 
