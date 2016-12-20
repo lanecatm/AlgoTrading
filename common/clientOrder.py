@@ -11,5 +11,5 @@ class clientOrder(object):
 		self.buysell = buysell
 		self.algChoice = algChoice
 		# self.timeInterval = timeInterval
-                self.completed = completed # number of shares that have been completed.
+		self.completed = completed # number of shares that have been completed.
 		self.status = status # 0 places, 1 sent, 2 completed
