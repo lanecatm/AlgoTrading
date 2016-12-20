@@ -12,38 +12,50 @@ import sys, os
 import sqlite3
 import MySQLdb
 import time
+import datetime
 import numpy as np
 sys.path.append("../tool")
 from Log import Log
 class repo:
 
-    # 初始化为sqlite 数据库
-    def __init__(self, file_path):
+
+    def __init_sqlite(self, file_path):
         # here should be abs path when connect db files
-        self._file_path = file_path
+        self._sqlite_file_path = file_path
         file_path_list = file_path.split('.')
         file_path_list[-1] = 'db'
-        self._db_file_path = '.'.join(file_path_list)
-        self.log = Log()
-        #print self._db_file_path
+        self._sqlite_db_file_path = '.'.join(file_path_list)
         filename = sys._getframe().f_code.co_filename
         filePath = os.path.realpath(filename).rsplit('/', 1)[0]
         self.log.info("file path: " + filePath)
-        self._connection = sqlite3.connect(filePath + "/"+ self._db_file_path)
+        self._sqlite_connection = sqlite3.connect(filePath + "/"+ self._sqlite_db_file_path)
 
-    # 初始化为mysql 数据库
-    def __init__(self, user, password, ip):
+
+    def __init_mysql(self, user, password, ip):
         if ip==None:
-            db = MySQLdb.connect("localhost", user, password, "history")
+            self._mysql_db = MySQLdb.connect("localhost", user, password, "algotradingDB")
+        else:
+            self._mysql_db = MySQLdb.connect(ip, user, password, "algotradingDB")
+        self._mysql_cursor = self._mysql_db.cursor()
 
+    # 初始化sqlite 和 mysql数据库
+    def __init__(self, isSqlite, isMysql, file_path, user, password, ip, isOpenLog = True):
+        self.log = Log(isOpenLog)
+        self.isMysql = isMysql
+        self.isSqlite = isSqlite
+        if self.isSqlite:
+            self.__init_sqlite(file_path)
+        if self.isMysql:
+            self.__init_mysql(user, password, ip)
 
 
     def __del__(self):
-        """
-        close db connection is necessary when process exits
-        :return:
-        """
-        self._connection.close()
+        if self.isMysql:
+            self._mysql_cursor.close()
+            self._mysql_db.close()
+
+        if self.isSqlite:
+            self._sqlite_connection.close()
 
 
     # 插入抓到的原始数据
@@ -55,49 +67,91 @@ class repo:
         statement = statement + infoArr[31] + ", "
         statement = statement + "datetime('now') )"
         #print statement
-        cursor = self._connection.execute(statement)
-        self._connection.commit()
+        cursor = self._sqlite_connection.execute(statement)
+        self._sqlite_connection.commit()
         cursor.close()
 
 
+    # 把爬到的数据导入mysql
     def change_data_into_mysql(self):
-        # 找到表中最小的时间
-        # 找到表中最大的时间
-        for nowTime in range(startTime, endTime, 60):
-
-            # 每间隔一分钟取出一条数据
-            # 插入mysql中
-
-
-    def get_amount(self):
-        return
-
-    def get_price(self):
-        return
-
-    def get_info(self, datetime)
-    
-    # 获取股票的成交数量
-    # @param startDate dateTime 从哪一天开始(较大的天数，包含)
-    # @param endDate dateTime 到哪一天结束(较小的天数，不包含)
-    # @param startTime time 每一天中的开始时间(包含这一刻)
-    # @param endTime time 每一天中的结束时间(不包含这一刻)
-    # @return  np.array
-    #          [[amount1, amount2, ..., amountn],
-    #          [amount1, amount2, ..., amountn],
-    #          ...                             
-    #          ]
-    # For Example
-    # startDate = 10.5 endDate = 10.2 startTime = 13:00 endTime = 15:00
-    # return [[10.5 13:00 amount, 10.5 13:01 amount, 10.5 13:02 amount, ..., 10.5 14:59 amount],
-    #         [10.4 13:00 amount, 10.4 13:01 amount, 10.4 13:02 amount, ..., 10.4 14:59 amount],
-    #         [10.3 13:00 amount, 10.3 13:01 amount, 10.3 13:02 amount, ..., 10.3 14:59 amount]]
-    def get_amount(self, startDate, endDate, startTime, endTime):
-        statement = "SELECT SUCCNUM FROM main.history_stock_info WHERE DATETIME(NOWDATE) > DATETIME(\"" + time.strftime("%Y-%m-%d", endDate) +"\") AND DATETIME(NOWDATE) <= DATETIME(\"" + time.strftime("%Y-%m-%d", startDate)\
-                +"\") AND TIME(NOWTIME) < TIME(\"" + time.strftime("%H:%M:%S", endTime) + "\") AND TIME(NOWTIME) >= TIME(\"" + time.strftime("%H:%M:%S", startTime) + "\")"
-        cursor = self._connection.execute(statement)
-        self._connection.commit()
+        statement = "SELECT MAX(ID) FROM main.history_stock_info"
+        cursor = self._sqlite_connection.execute(statement)
+        self._sqlite_connection.commit()
         data = cursor.fetchall()
         cursor.close()
-        data = np.array(data)
-        return data
+        maxId = data[0][0]
+        self.log.info("max Id:" + str(maxId))
+        for i in range(1, maxId):
+            # 从sqlite 读取一条数据
+            statement = "SELECT * FROM main.history_stock_info WHERE ID = " + str(i)
+            cursor = self._sqlite_connection.execute(statement)
+            self._sqlite_connection.commit()
+            data = cursor.fetchall()
+            cursor.close()
+
+            # 插入mysql 一条数据
+            statement = "INSERT INTO algotradingDB.history_stock_info values ("
+            for dataTuple in data[0]:
+                statement = statement + "'"+ str(dataTuple) + "'" + ","
+            statement = statement[:-1]
+            statement = statement + ")"
+            #self.log.info("insert into mysql statement: " + statement)
+            self._mysql_cursor.execute(statement)
+            self._mysql_db.commit()
+            #self.log.info("insert succ")
+            if i % 1000 ==0 :
+                self.log.info("insert "+str(i) + " succ")
+
+
+    # 从mysql获取每个时间点的成交量
+    def get_amount(self, stockId, startDate, endDate, startTime, endTime):
+        self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
+        delta = (startDate - endDate).days
+        self.log.info("during date:" + str(delta))
+        allAmountList = []
+        for dateIndex in range(delta):
+            nowFindingDate = startDate - datetime.timedelta(days = dateIndex)
+            # 找时间间隔的时候包含开始时间点不包含结束时间点
+            statement = "select id, nowdate, time_format(nowtime, '%H:%i:%s'), succnum from algotradingDB.history_stock_info where id in (select min(id) from algotradingDB.history_stock_info where nowdate='" + nowFindingDate.isoformat() + "' and stockid='" + str(stockId) + "' and nowtime >= '" + startTime.strftime("%H:%M:%S") + "' and nowtime < '" + endTime.strftime("%H:%M:%S") + "' group by extract(hour_minute from nowtime)) order by id"
+            self.log.info("get_amount statement : " + statement)
+            self._mysql_cursor.execute(statement)
+            data = self._mysql_cursor.fetchall()
+            self.log.info ("get from mysql " + str(data))
+            self.log.info ("get from mysql " + str(len(data)))
+            dateAmountList = []
+            if len(data) != 0:
+                self.log.info("startTime:" + data[0][1].isoformat() + " " + data[0][2])
+                self.log.info("endTime:" + data[-1][1].isoformat() + " " + data[-1][2])
+            for i in range(len(data) - 1):
+                dateAmountList.append(data[i+1][3] - data[i][3])
+            allAmountList.append(dateAmountList)
+        return allAmountList
+
+    # 从mysql获取每个时间点的成交价格
+    def get_price(self, stockId, startDate, endDate, startTime, endTime):
+        self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
+        delta = (startDate - endDate).days
+        self.log.info("during date:" + str(delta))
+        allPriceList = []
+        for dateIndex in range(delta):
+            nowFindingDate = startDate - datetime.timedelta(days = dateIndex)
+            # 找时间间隔的时候包含开始时间点不包含结束时间点
+            statement = "select id, nowdate, time_format(nowtime, '%H:%i:%s'), nowprice from algotradingDB.history_stock_info where id in (select min(id) from algotradingDB.history_stock_info where nowdate='" + nowFindingDate.isoformat() + "' and stockid='" + str(stockId) + "' and nowtime >= '" + startTime.strftime("%H:%M:%S") + "' and nowtime < '" + endTime.strftime("%H:%M:%S") + "' group by extract(hour_minute from nowtime)) order by id"
+            self.log.info("get_amount statement : " + statement)
+            self._mysql_cursor.execute(statement)
+            data = self._mysql_cursor.fetchall()
+            self.log.info ("get from mysql " + str(data))
+            self.log.info ("get from mysql " + str(len(data)))
+            datePriceList = []
+            if len(data) != 0:
+                self.log.info("startTime:" + data[0][1].isoformat() + " " + data[0][2])
+                self.log.info("endTime:" + data[-1][1].isoformat() + " " + data[-1][2])
+            for i in range(len(data)):
+                datePriceList.append(data[i][3])
+            allPriceList.append(datePriceList)
+        return allPriceList
+
+        return
+
+    #def get_info(self, datetime)
+    
