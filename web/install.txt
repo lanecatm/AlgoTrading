@@ -1,7 +1,0 @@
-use web.py to create a web site
-install:
-    pip install web.py
-post request: add a request to SQL
-
-
-
