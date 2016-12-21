@@ -104,13 +104,29 @@ class repo:
 
 
     # 从mysql获取每个时间点的成交量
+    # 包含startDate, 不包含endDate, 包含startTime, 不包含endTime
+    # 周末直接跳过
     def get_amount(self, stockId, startDate, endDate, startTime, endTime):
         self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
         delta = (startDate - endDate).days
         self.log.info("during date:" + str(delta))
         allAmountList = []
+        allTimeList = []
         for dateIndex in range(delta):
             nowFindingDate = startDate - datetime.timedelta(days = dateIndex)
+            # 为了防止最后一个时间点跨天，所以在此重新找到最后一个时间点的交易量
+            # 最后一个时间点可能不在交易时间段内，这样为空，否则加入末尾
+            statement = "select id, nowdate, time_format(nowtime, '%H:%i:%s'), succnum from algotradingDB.history_stock_info where id in (select min(id) from algotradingDB.history_stock_info where nowdate='" + nowFindingDate.isoformat() + "' and stockid='" + str(stockId) + "' and extract(hour_minute from nowtime)=extract(hour_minute from '" + endTime.strftime("%Y-%m-%d %H:%M:%S") + "')" + " group by extract(hour_minute from nowtime)) order by id"
+            self.log.info("get_final statement : " + statement)
+            self._mysql_cursor.execute(statement)
+            data = self._mysql_cursor.fetchall()
+            self.log.info(str(data))
+            if len(data) == 0:
+                isAddFinalData = False
+            else:
+                isAddFinalData = True
+                finalData = data[0][3]
+
             # 找时间间隔的时候包含开始时间点不包含结束时间点
             statement = "select id, nowdate, time_format(nowtime, '%H:%i:%s'), succnum from algotradingDB.history_stock_info where id in (select min(id) from algotradingDB.history_stock_info where nowdate='" + nowFindingDate.isoformat() + "' and stockid='" + str(stockId) + "' and nowtime >= '" + startTime.strftime("%H:%M:%S") + "' and nowtime < '" + endTime.strftime("%H:%M:%S") + "' group by extract(hour_minute from nowtime)) order by id"
             self.log.info("get_amount statement : " + statement)
@@ -119,20 +135,28 @@ class repo:
             self.log.info ("get from mysql " + str(data))
             self.log.info ("get from mysql " + str(len(data)))
             dateAmountList = []
+            dateTimeList = []
             if len(data) != 0:
                 self.log.info("startTime:" + data[0][1].isoformat() + " " + data[0][2])
                 self.log.info("endTime:" + data[-1][1].isoformat() + " " + data[-1][2])
-            for i in range(len(data) - 1):
-                dateAmountList.append(data[i+1][3] - data[i][3])
-            allAmountList.append(dateAmountList)
-        return allAmountList
+                for i in range(len(data) - 1):
+                    dateAmountList.append(data[i+1][3] - data[i][3])
+                    dateTimeList.append(data[i][1].isoformat() + " " + data[i][2])
+                if isAddFinalData:
+                    dateAmountList.append(finalData - data[-1][3])
+                    dateTimeList.append(data[-1][1].isoformat() + " " + data[-1][2])
+                allAmountList.append(dateAmountList)
+                allTimeList.append(dateTimeList)
+        return allAmountList, allTimeList
 
     # 从mysql获取每个时间点的成交价格
+    # 包含startDate, 不包含endDate, 包含startTime, 不包含endTime
     def get_price(self, stockId, startDate, endDate, startTime, endTime):
         self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
         delta = (startDate - endDate).days
         self.log.info("during date:" + str(delta))
         allPriceList = []
+        allTimeList = []
         for dateIndex in range(delta):
             nowFindingDate = startDate - datetime.timedelta(days = dateIndex)
             # 找时间间隔的时候包含开始时间点不包含结束时间点
@@ -143,15 +167,16 @@ class repo:
             self.log.info ("get from mysql " + str(data))
             self.log.info ("get from mysql " + str(len(data)))
             datePriceList = []
+            dateTimeList = []
             if len(data) != 0:
                 self.log.info("startTime:" + data[0][1].isoformat() + " " + data[0][2])
                 self.log.info("endTime:" + data[-1][1].isoformat() + " " + data[-1][2])
-            for i in range(len(data)):
-                datePriceList.append(data[i][3])
-            allPriceList.append(datePriceList)
-        return allPriceList
-
-        return
+                for i in range(len(data)):
+                    datePriceList.append(data[i][3])
+                    dateTimeList.append(data[i][1].isoformat() + " " + data[i][2])
+                allPriceList.append(datePriceList)
+                allTimeList.append(dateTimeList)
+        return allPriceList, allTimeList
 
     #def get_info(self, datetime)
     
