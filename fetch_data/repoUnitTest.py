@@ -29,15 +29,29 @@ class repoUnitTest(unittest.TestCase):
         #sqliteRepo.change_data_into_mysql()
         return
 
-    def test_mysql(self):
+    def test_mysql_get_amount(self):
         mysqlRepo = repo(False, True , None, "algotrading", "12345678", None)
-
         startTime = datetime.datetime(2016,12,17,9,30,0)
-        endTime = datetime.datetime(2016,12,14, 10,0,0)
-        data = mysqlRepo.get_amount(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
-        self.log.info(str(data))
-        data = mysqlRepo.get_price(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
-        self.log.info(str(data))
+        endTime = datetime.datetime(2016,12,14, 14,0,0)
+        data, time = mysqlRepo.get_amount(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
+        self.assertEqual(len(data), 2)
+        self.assertEqual(len(time), 2)
+        for dataLine in data:
+            self.assertEqual(len(dataLine), 181)
+        for dataLine in time:
+            self.assertEqual(len(dataLine), 181)
+
+    def test_mysql_get_price(self):
+        mysqlRepo = repo(False, True , None, "algotrading", "12345678", None)
+        startTime = datetime.datetime(2016,12,17,9,30,0)
+        endTime = datetime.datetime(2016,12,14, 14,0,0)
+        data, time = mysqlRepo.get_price(600000, startTime.date(), endTime.date(), startTime.time(), endTime.time())
+        self.assertEqual(len(data), 2)
+        self.assertEqual(len(time), 2)
+        for dataLine in data:
+            self.assertEqual(len(dataLine), 181)
+        for dataLine in time:
+            self.assertEqual(len(dataLine), 181)
         return
 
 
