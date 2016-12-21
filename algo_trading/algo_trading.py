@@ -8,6 +8,7 @@
 @description: 
 """
 import sys
+#sys.path.append("../cli/")
 sys.path.append("../common/")
 import clientOrder
 import orderResult
@@ -18,31 +19,49 @@ from VWAPQuantAnalysis import VWAPQuantAnalysis
 sys.path.append("../pool")
 # import poolFromSinaApi
 from poolFromTushare import poolFromTushare
-import sqlite3
-sys.path.append("../cli/")
-#from cli import dbfile
-dbfile = 'test_0.1.db'
-import datetime
 from tradingRecordRepo import tradingRecordRepo
 sys.path.append("../fetch_data")
 from repoFromTushare import repoFromTushare
-
-import numpy as np
-
 sys.path.append("../tool")
 from Log import Log
 
+import numpy as np
+import MySQLdb
+import datetime
+import sqlite3
+
+dbfile = 'test_0.1.db'
+
 class algo_trading:
-    def __init__(self, ClientOrder):
-        self.setParam(ClientOrder)
+    # TBD
+    #def __init__(self, ClientOrder):
+    def __init__(self):
+        #self.setParam(ClientOrder)
         self.marketGetter = repoFromTushare()
         self.saveEngine = tradingRecordRepo("test_trading_record.db")
         self.pool = poolFromTushare(self.marketGetter, self.saveEngine)
         self.log = Log()
+        self.orders = []
 
     # 设置交易参数，传入一个 clientOrder 类
     def setParam(self, CO):
         self.clientOrder = CO
+    
+    # 将数据库中未完成的订单信息读到二维list orders 
+    def extractOrder(self):
+        db = MySQLdb.connect("localhost","root","weiyisjtu","algotradingDB")
+        cursor = db.cursor()
+        sql = "SELECT * FROM CLIENTORDERS WHERE COMPLETEDAMOUNT < STOCKAMOUNT"
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            for row in results:
+                self.orders.append([])
+                for i in range(12):
+                    self.orders[-1].append(row[i])
+        except:
+            print "Error: unable to fetch client orders"
+        db.close()
 
     # 获取真实情况下的Vwap值
     def getVwapActual(self, startTime, endTime):
@@ -59,6 +78,7 @@ class algo_trading:
 
 
     # 根据订单通过不同策略执行交易，返回list, 该 list 存储每个交易时间点返回的 tradingUnit。
+    # TBD 斜率 下单, trade request for one order
     def tradeRequest(self):
         self.resultList = []
         tradingTime = self.clientOrder.startTime
@@ -94,8 +114,7 @@ class algo_trading:
             self.quant_analysis = TWAPQuantAnalysis()
         elif self.clientOrder.algChoice == "vwap":
             self.quant_analysis = VWAPQuantAnalysis(self.marketGetter)
-        self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime,
-                                                      self.clientOrder.timeInterval)
+        self.quant_result = self.quant_analysis.getRecommendOrderWeight(self.clientOrder.startTime, self.clientOrder.endTime, self.clientOrder.timeInterval)
 
 
 if __name__ == '__main__':
