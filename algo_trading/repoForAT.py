@@ -11,11 +11,11 @@ from Log import Log
 class repoForAT:
     def __init__(self, user, password, ip, isOpenLog = True):
         self.log = Log(isOpenLog)
-    if ip==None:
-        self._mysql_db = MySQLdb.connect("localhost", user, password, "algotradingDB")
-    else:
-        self._mysql_db = MySQLdb.connect(ip, user, password, "algotradingDB")
-    self._mysql_cursor = self._mysql_db.cursor()
+        if ip==None:
+            self._mysql_db = MySQLdb.connect("localhost", user, password, "algotradingDB")
+        else:
+            self._mysql_db = MySQLdb.connect(ip, user, password, "algotradingDB")
+        self._mysql_cursor = self._mysql_db.cursor()
 
     def __del__(self):
         self._mysql_cursor.close()
