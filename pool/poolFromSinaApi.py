@@ -86,6 +86,7 @@ class poolFromSinaApi(poolBase):
 
     # 限价单
     # 目前只买卖1的限价
+    # TODO 修改限价单
     def trade_limited_price_order(self, tradingUnitOrder):
         self.log.info("into trade_limited_price_order")
         marketData = self.get_market_trading_data(tradingUnitOrder)

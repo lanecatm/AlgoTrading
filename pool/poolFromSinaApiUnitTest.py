@@ -141,6 +141,31 @@ class poolFromSinaApiUnitTest(unittest.TestCase):
         succAmount, succMoney = pool.trade_limited_price_order(testTradingUnit)
         self.assertEqual(succAmount, 1000)
 
+    def test_trade_order_sync(self):
+        dataGetter = mockMarketDataGetter()
+        pool = poolFromSinaApi(dataGetter, True)
+        tradingUnitId = 1
+        stockId = 600000
+        time = datetime.datetime.strptime("2016-12-16 10:00:00" , "%Y-%m-%d %H:%M:%S")
+        buysell = tradingUnit.BUY
+        isSync = True
+        tradingType = tradingUnit.FIRST_PRICE_ORDER 
+        amount = 500
+        # 未超过界限
+        self.log.info("expect see into first price order")
+        testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount)
+        ansTradingUnit = pool.trade_order_sync(testTradingUnit)
+
+        self.log.info("expect see into all price order")
+        tradingType = tradingUnit.ALL_PRICE_ORDER
+        testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount)
+        ansTradingUnit = pool.trade_order_sync(testTradingUnit)
+
+        self.log.info("expect see into limit price order")
+        tradingType = tradingUnit.LIMITE_PRICE_ORDER
+        testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount, 20)
+        ansTradingUnit = pool.trade_order_sync(testTradingUnit)
+
 
 
 
