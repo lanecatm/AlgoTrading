@@ -9,15 +9,46 @@
 # ==============================================================================
 import datetime
 class tradingUnit:
-    # attribute: buy True, sell False
-    def __init__(self, orderId, stockId, buysell, amount, price, isSuccess, time):
-        self.time = time
+    self.BUY = 0
+    self.SELL = 1
+    self.LIMITE_PRICE_ORDER = 0
+    self.FIRST_PRICE_ORDER = 1
+    self.ALL_PRICE_ORDER = 2
+    def __init__(self, tradingUnitId, stockId, time, buysell, isSync, tradingType, amount, expectPrice = None):
+        # 交易单号
+        self.tradingUnitId= tradingUnitId
+        # 交易的股票id
         self.stockId = stockId
-        self.amount = amount
+        # 发送交易订单时间
+        self.time = time
+        # 买股票还是卖股票
         self.buysell = buysell
+        # 同步还是异步
+        self.isSync = isSync
+        # 交易类型
+        self.tradingType = tradingType
+        # 交易的股票数量
+        self.amount = amount
+        # 如果是限价单，那么限制交易的价格是
+        self.expectPrice = expectPrice
+        # 交易是否成功
+        self.isSuccess = False
+        # 交易成功量
+        self.succAmount = 0
+        # 交易用去总花费
+        self.succMoney = 0
+        # 交易平均每股价格
+        self.price = 0
+
+    def refresh_order(self, amount, money, isSuccess):
+        self.succAmount = amount
+        self.succMoney = momey
+        self.price = money / amount
         self.isSuccess = isSuccess
-        self.price = price
-        self.orderId = orderId
+
     def toString(self):
-        return "time " + self.time.strftime("%Y-%m-%d %H:%M:%S") + " stockId " + str(self.stockId) + " amount " + str(self.amount) + " buysell " + str(self.buysell) + " isSucc " + str(self.isSuccess) + " price " + str(self.price) + "orderid " + str(self.orderId)
+        tradingInputInfo = " tradingUnitId " + str(self.tradingUnitId) + " stockId " + str(self.stockId) + " time " + self.time.strftime("%Y-%m-%d %H:%M:%S") + " amount " + str(self.amount) + " expect price " + str(expectPrice)
+        tradingAttribute = " buysell " + str(self.buysell) + " isSync " + str(self.isSync) + " tradingType" + str(self.tradingType)
+        tradingResult = " isSucc " + str(self.isSuccess) + " succ amount " + str(self.succAmount) + " succ momey " + str(self.succMoney) + " price " + str(self.price)
+        return tradingInputInfo + tradingAttribute + tradingResult
 
