@@ -14,16 +14,21 @@ import datetime
 import numpy as np
 from repo import repo
 from VWAPQuantAnalysis import VWAPQuantAnalysis
+from LinearVWAPQuantAnalysis import LinearVWAPQuantAnalysis
 
 
 if __name__ == '__main__':
     repoEngine = repo(False, True , None, "algotrading", "12345678", None)
 
     VWAPAnalysis = VWAPQuantAnalysis(repoEngine)
+    LinearVWAPAnalysis = LinearVWAPQuantAnalysis(repoEngine)
     startDate=datetime.datetime.strptime("2016-12-15 13:00:00" , "%Y-%m-%d %H:%M:%S")
     endDate = datetime.datetime.strptime("2016-12-16 14:06:00", "%Y-%m-%d %H:%M:%S")
 
     ansDict = VWAPAnalysis.get_recommend_order_weight(600000, startDate, endDate, 2)
+    ansDict = sorted(ansDict.iteritems(), key=lambda keyValue: datetime.datetime.strptime(keyValue[0], "%Y-%m-%d %H:%M:%S"), reverse = True)
+    print ansDict
+    ansDict = LinearVWAPAnalysis.get_recommend_order_weight(600000, startDate, endDate, 2)
     ansDict = sorted(ansDict.iteritems(), key=lambda keyValue: datetime.datetime.strptime(keyValue[0], "%Y-%m-%d %H:%M:%S"), reverse = True)
     print ansDict
     

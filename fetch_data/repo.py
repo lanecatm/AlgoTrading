@@ -147,7 +147,7 @@ class repo:
                     dateTimeList.append(data[-1][1].isoformat() + " " + data[-1][2])
                 allAmountList.append(dateAmountList)
                 allTimeList.append(dateTimeList)
-        return allAmountList, allTimeList
+        return np.array(allAmountList), np.array(allTimeList)
 
     # 从mysql获取每个时间点的成交价格
     # 包含startDate, 不包含endDate, 包含startTime, 不包含endTime
@@ -176,7 +176,7 @@ class repo:
                     dateTimeList.append(data[i][1].isoformat() + " " + data[i][2])
                 allPriceList.append(datePriceList)
                 allTimeList.append(dateTimeList)
-        return allPriceList, allTimeList
+        return np.array(allPriceList), np.array(allTimeList)
 
     #def get_info(self, datetime)
     
