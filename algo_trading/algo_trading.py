@@ -44,12 +44,13 @@ class algo_trading:
         self.orders = []
 
     # 设置交易参数，传入一个 clientOrder 类
+    # Deprecated ?
     def setParam(self, CO):
         self.clientOrder = CO
     
     # 将数据库中未完成的订单信息读到二维list orders 
     def extractOrder(self):
-        db = MySQLdb.connect("localhost","root","weiyisjtu","algotradingDB")
+        db = MySQLdb.connect("localhost","algotrading","12345678","algotradingDB")
         cursor = db.cursor()
         sql = "SELECT * FROM CLIENTORDERS WHERE COMPLETEDAMOUNT < STOCKAMOUNT"
         try:
