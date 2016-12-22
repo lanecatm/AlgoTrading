@@ -61,7 +61,7 @@ class repo:
     # 插入抓到的原始数据
     # @param infoArr [x1, x1, ..., x32]
     def insert_data(self, infoArr):
-        statement = "INSERT INTO main.history_stock_info VALUES(NULL,"
+        statement = "INSERT  O main.history_stock_info VALUES(NULL,"
         for i in range(0, 31):
             statement = statement + infoArr[i] + ","
         statement = statement + infoArr[31] + ", "
@@ -90,7 +90,7 @@ class repo:
             cursor.close()
 
             # 插入mysql 一条数据
-            statement = "INSERT INTO algotradingDB.history_stock_info values ("
+            statement = "INSERT  O algotradingDB.history_stock_info values ("
             for dataTuple in data[0]:
                 statement = statement + "'"+ str(dataTuple) + "'" + ","
             statement = statement[:-1]
@@ -107,6 +107,9 @@ class repo:
     # 包含startDate, 不包含endDate, 包含startTime, 不包含endTime
     # 周末直接跳过
     def get_amount(self, stockId, startDate, endDate, startTime, endTime):
+        if not self.isMysql:
+            self.log.error("have not init mysql")
+            return
         self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
         delta = (startDate - endDate).days
         self.log.info("during date:" + str(delta))
@@ -152,6 +155,9 @@ class repo:
     # 从mysql获取每个时间点的成交价格
     # 包含startDate, 不包含endDate, 包含startTime, 不包含endTime
     def get_price(self, stockId, startDate, endDate, startTime, endTime):
+        if not self.isMysql:
+            self.log.error("have not init mysql")
+            return
         self.log.info(str(startDate) + str(endDate) + str(startTime) + str(endTime))
         delta = (startDate - endDate).days
         self.log.info("during date:" + str(delta))
@@ -178,5 +184,25 @@ class repo:
                 allTimeList.append(dateTimeList)
         return np.array(allPriceList), np.array(allTimeList)
 
-    #def get_info(self, datetime)
+    # param searchTime datetime
+    # return list all attribute expect id and add time
+    def get_data(self, stockId, searchTime):
+        if not self.isMysql:
+            self.log.error("have not init mysql")
+            return
+        self.log.info("stockId " + str(stockId) + " search time " + searchTime.isoformat())
+        searchTimeNextMinute = searchTime + datetime.timedelta(seconds = 60)
+        itemsStr = """STOCKID, TODAYOPENPRICE, YESTERDAYCLOSEPRICE, NOWPRICE, TODAYHIGHEST, TODAYLOWEST, BUYPRICE, SELLPRICE, SUCCNUM, SUCCPRICE, BUYONENUMBER, BUYONEPRICE, BUYTWONUMBER, BUYTWOPRICE, BUYTHREENUMBER, BUYTHREEPRICE, BUYFOURNUMBER, BUYFOURPRICE, BUYFIVENUMBER, BUYFIVEPRICE, SELLONENUMBER, SELLONEPRICE, SELLTWONUMBER, SELLTWOPRICE, SELLTHREENUMBER, SELLTHREEPRICE, SELLFOURNUMBER, SELLFOURPRICE, SELLFIVENUMBER, SELLFIVEPRICE, date_format(NOWDATE, '"%Y-%m-%d"'), time_format(NOWTIME, '"%H:%i:%s"'), INSERTTIME """
+        statement = "select " + itemsStr + " from algotradingDB.history_stock_info where id in (select min(id) from algotradingDB.history_stock_info where nowdate='" + searchTime.date().isoformat() + "' and stockid='" + str(stockId) + "' and nowtime >= '" + searchTime.strftime("%H:%M:%S") + "' and nowtime < '" + searchTimeNextMinute.strftime("%H:%M:%S") + "' group by extract(hour_minute from nowtime)) order by id"
+        self.log.info("get_amount statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
+
+        if len(data) > 0:
+            self.log.info("return from repo info:" + str(data[0]))
+            return data[0][1:-1]
+        else:
+            return []
+
+        
     

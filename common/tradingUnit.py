@@ -9,15 +9,16 @@
 # ==============================================================================
 import datetime
 class tradingUnit:
-    self.BUY = 0
-    self.SELL = 1
-    self.LIMITE_PRICE_ORDER = 0
-    self.FIRST_PRICE_ORDER = 1
-    self.ALL_PRICE_ORDER = 2
+    BUY = 0
+    SELL = 1
+    LIMITE_PRICE_ORDER = 0
+    FIRST_PRICE_ORDER = 1
+    ALL_PRICE_ORDER = 2
+
     def __init__(self, tradingUnitId, stockId, time, buysell, isSync, tradingType, amount, expectPrice = None):
         # 交易单号
         self.tradingUnitId= tradingUnitId
-        # 交易的股票id
+        # 交易的股票id int
         self.stockId = stockId
         # 发送交易订单时间
         self.time = time
@@ -42,12 +43,12 @@ class tradingUnit:
 
     def refresh_order(self, amount, money, isSuccess):
         self.succAmount = amount
-        self.succMoney = momey
+        self.succMoney = money
         self.price = money / amount
         self.isSuccess = isSuccess
 
     def toString(self):
-        tradingInputInfo = " tradingUnitId " + str(self.tradingUnitId) + " stockId " + str(self.stockId) + " time " + self.time.strftime("%Y-%m-%d %H:%M:%S") + " amount " + str(self.amount) + " expect price " + str(expectPrice)
+        tradingInputInfo = " tradingUnitId " + str(self.tradingUnitId) + " stockId " + str(self.stockId) + " time " + self.time.strftime("%Y-%m-%d %H:%M:%S") + " amount " + str(self.amount) + " expect price " + str(self.expectPrice)
         tradingAttribute = " buysell " + str(self.buysell) + " isSync " + str(self.isSync) + " tradingType" + str(self.tradingType)
         tradingResult = " isSucc " + str(self.isSuccess) + " succ amount " + str(self.succAmount) + " succ momey " + str(self.succMoney) + " price " + str(self.price)
         return tradingInputInfo + tradingAttribute + tradingResult

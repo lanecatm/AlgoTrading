@@ -56,13 +56,13 @@ class poolBase:
     # param tradingUnitId int
     # return bool 是否撤销成功
     # return tradingUnit/None
-    def drop_order(self, tradingUnitId)
+    def drop_order(self, tradingUnitId):
         return
     
     # 寻找一个order
     # param tradingUnitId int
     # return tradingUnit
-    def search_order(self, tradingUnitId)
+    def search_order(self, tradingUnitId):
         return 
 
         
