@@ -12,6 +12,8 @@ class marketDataGetter:
 
     # old stock id 601006
     def get_data(self, stockId):
+        if isinstance(stockId, int):
+            stockId = str(stockId)
         #self.log.info("get_data(), input stock id" + stockId)
         url = 'http://hq.sinajs.cn/list=sh' + stockId
         #self.log.info("request url: " + url)
@@ -26,6 +28,7 @@ class marketDataGetter:
         infoArr[-3] = '"' + infoArr[-3] + '"'
         infoArr[-2] = '"' + infoArr[-2] + '"'
 
+        infoArr[0] = stockId
         self.log.info("get data from sina api:\n" + str(infoArr[:-1]))
         return infoArr[:-1]
 
