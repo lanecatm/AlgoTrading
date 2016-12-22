@@ -1,7 +1,3 @@
-drop user if exists "algotrading"@"%"; 
-create user "algotrading"@"%" IDENTIFIED BY "12345678";
-flush privileges;
-
 drop database if exists algotradingDB; 
 create database algotradingDB;
 grant all privileges on algotradingDB.* to algotrading@"%" identified by "12345678";
@@ -56,7 +52,10 @@ create table client_orders(
     STATUS INT,
     QUANTANALYSIS MEDIUMTEXT,
     PROCESSID INT, 
-    UPDATETIME DATETIME);
+    UPDATETIME DATETIME,
+    NEXTUPDATETIME DATETIME,
+    UPDATEINTERVAL TIME,
+    TRADETIME DATETIME);
 
 
 
