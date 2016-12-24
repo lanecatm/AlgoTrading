@@ -77,7 +77,7 @@ class AlgoTrading:
             order.updateTime = datetime.datetime.now()
             # B
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
+            aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - order.completedAmount
             # D
             if aboutToTrade < self.TRADE_UNIT:
                 order.trdeTime = None
