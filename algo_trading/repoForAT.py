@@ -1,3 +1,4 @@
+# -*- encoding:utf-8 -*-
 import sys, os
 import sqlite3
 import MySQLdb
@@ -6,6 +7,8 @@ import datetime
 import numpy as np
 sys.path.append("../tool")
 from Log import Log
+sys.path.append("../common")
+from clientOrder import clientOrder
 
 
 class repoForAT:
@@ -28,29 +31,29 @@ class repoForAT:
             quantAnalysisDict = {}
         else:
             quantAnalysisDict = orderInfo.quantAnalysisDict
-        if orderId.updateTime == None:
+        if orderInfo.updateTime == None:
             updateTime = "NULL"
         else:
-            updateTime = orderInfo.updateTime.strftime("%Y-%m-%d %H:%M:%S")
+            updateTime = "'" + orderInfo.updateTime.strftime("%Y-%m-%d %H:%M:%S") + "'"
         if orderInfo.nextUpdateTime == None:
             nextUpdateTime = "NULL"
         else:
-            nextUpdateTime = orderInfo.nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S")
+            nextUpdateTime = "'" + orderInfo.nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S") + "'"
         if orderInfo.tradeTime == None:
             tradeTime ="NULL"
         else:
-            tradeTime = orderInfo.tradeTime.strftime("%Y-%m-%d %H:%M:%S")
+            tradeTime = "'" + orderInfo.tradeTime.strftime("%Y-%m-%d %H:%M:%S") + "'"
 
         statement = "INSERT INTO algotradingDB.client_orders values( NULL, "\
                 + str(orderInfo.stockId) + ", "\
-                + orderInfo.startTime.strftime("%Y-%m-%d %H:%M:%S") + ", "\
-                + orderInfo.endTime.strftime("%Y-%m-%d %H:%M:%S") + ", "\
+                + "'" + orderInfo.startTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
+                + "'" + orderInfo.endTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
                 + str(orderInfo.stockAmount) + ", "\
                 + str(orderInfo.buySell) + ", "\
-                + str(orderInfo.algoChoice) + ", "\
+                + str(orderInfo.algChoice) + ", "\
                 + str(orderInfo.completedAmount) + ", "\
                 + str(orderInfo.status) + ", "\
-                + str(quantAnalysisDict) + ", "\
+                + "'" + str(quantAnalysisDict) + "', "\
                 + str(orderInfo.processId) + ", "\
                 + str(updateTime) + ", "\
                 + str(nextUpdateTime) + ", "\
@@ -59,25 +62,34 @@ class repoForAT:
                 + str(orderInfo.tradingType) + ", "\
                 + str(orderInfo.trunOver) + ", "\
                 + str(orderInfo.avgPrice) + ")"
-        self.log.info("get_final statement : " + sql)
+        self.log.info("get_final statement : " + statement)
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
     
     # 寻找没有量化分析的单号
     # return list<clientOrder>
     def extract_uninit_orders(self):
-        return
+        ansList = []
+        statement = "SELECT * FROM algotradingDB.client_orders WHERE STATUS = " + str(clientOrder.UNINIT)
+        self.log.info("extract_uninit_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
+        for dataUnit in data:
+            clientOrderUnit = clientOrder()
+            clientOrderUnit.create_order_by_sql_list(dataUnit)
+            ansList.append(clientOrderUnit)
+        return ansList
 
 
     # 寻找未完成需要在当前时间点交易的单号
     # param nowTime datetime
     def extract_trading_orders(self, nowTime):
-        sql = "SELECT * FROM algotradingDB.client_orders WHERE NEXTUPDATETIME < " + nowTime.strftime("%Y-%m-%d %H:%M:%S")\
-                + " AND STATUS < " + str(clientOrder.COMPLERED)
-        self.log.info("extract_trading_orders statement : " + sql)
-        self._mysql_cursor.execute(sql)
-        data = self._mysql_cursor.fetchall()
         ansList = []
+        statement = "SELECT * FROM algotradingDB.client_orders WHERE TRADETIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
+                + " AND STATUS = " + str(clientOrder.INIT)
+        self.log.info("extract_trading_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -88,14 +100,29 @@ class repoForAT:
     # param nowTime datetime
     def extract_refresh_orders(self, nowTime):
         ansList = []
-        sql = "SELECT * FROM algotradingDB.client_orders WHERE COMPLETEDAMOUNT < STOCKAMOUNT"
-        self.log.info("get_final statement : " + sql)
-        self._mysql_cursor.execute(sql)
+        statement = "SELECT * FROM algotradingDB.client_orders WHERE NEXTUPDATETIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
+                + " AND STATUS = " + str(clientOrder.INIT)
+        self.log.info("extract_refresh_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        for dataUnit in data:
+            clientOrderUnit = clientOrder()
+            clientOrderUnit.create_order_by_sql_list(dataUnit)
+            ansList.append(clientOrderUnit)
         return ansList
 
+    # 需要更新为已完成状态的单号
     def extract_completed_orders(self, nowTime):
         ansList = []
+        statement = "SELECT * FROM algotradingDB.client_orders WHERE ENDTIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
+                + " AND STATUS = " + str(clientOrder.INIT)
+        self.log.info("extract_completed_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
+        for dataUnit in data:
+            clientOrderUnit = clientOrder()
+            clientOrderUnit.create_order_by_sql_list(dataUnit)
+            ansList.append(clientOrderUnit)
         return ansList
 
 
