@@ -100,5 +100,22 @@ class AlgoTrading:
         return t - datetime.timedelta(seconds = t.second) - datetime.timedelta(microseconds = t.microsecond)
  
 
+class repoTest:
+    pass
 
-            
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        t = 0
+    else:
+        t = argv[1]
+    rat = repoForAT('algotrading', '12345678', None, None)
+
+    
+    at = AlgoTrading()
+
+    while 1:
+        time.sleep(t)
+
+
+
+
