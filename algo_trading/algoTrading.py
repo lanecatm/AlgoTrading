@@ -62,7 +62,7 @@ class AlgoTrading:
             if aboutToTrade < TRADE_UNIT:
                 order.trdeTime = None
             elif order.nextUpdateTime > order.endTime:
-                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 *
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp())
             else:
                 order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             # C
@@ -71,7 +71,6 @@ class AlgoTrading:
             elif aboutToTrade >= HIGH_INTERVAL_BOUND:
                 if order.updateTimeInterval > 1:
                     order.updateTimeInterval = order.updateTimeInterval / ZOOM
-            
 
             self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
 
