@@ -25,6 +25,14 @@ import random
 from repoForAT import repoForAT
 
 class AlgoTrading:
+    LOW_TRADE_BOUND = 200
+    HIGH_TRADE_BOUND = 5000
+    LOW_INTERVAL_BOUND = 500
+    HIGH_INTERVAL_BOUND = 2000
+    SMALL_INTERVAL = 1
+    MID_INTERVAL = 2
+    LARGE_INTERVAL = 4
+
     def __init__(self):
         self.log = Log()
         self.rat = repoForAT()
@@ -48,18 +56,30 @@ class AlgoTrading:
     def refresh(self):
         self.refresh_orders = self.rat.extract_refresh_orders(datetime.datetime.now())
         for order in self.refresh_orders:
+            # A
             order.updateTime = datetime.datetime.now()
-            order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
+            # B
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            aboutToTrade = orders.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
-            if aboutToTrade < 200:
-                order.trdeTime = NULL
+            aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
+            # D
+            if aboutToTrade < LOW_TRADE_BOUND:
+                order.trdeTime = None
+            else:
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
+            # C
+            if aboutToTrade < LOW_INTERVAL_BOUND:
+                order.updateTimeInterval = SMALL_INTERVAL
+            elif aboutToTrade < HIGH_INTERVAL_BOUND:
+                order.updateTimeInterval = MID_INTERVAL
+            else:
+                order.updateTimeInterval = LARGE_INTERVAL
+
             self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
 
     # parameter datetime
     # output datetime in whole minutes
     def erase_seconds(self, t):
-        return t - timedate.timedelta(seconds = t.second) - timedate.timedelta(microseconds = t.microsecond)
+        return t - datetime.timedelta(seconds = t.second) - timedate.timedelta(microseconds = t.microsecond)
  
 
 
