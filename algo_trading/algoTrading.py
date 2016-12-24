@@ -4,23 +4,20 @@ sys.path.append("../common/")
 import clientOrder
 import orderResult
 from tradingUnit import tradingUnit
+
 sys.path.append("../quant_analysis")
 from TWAPQuantAnalysis import TWAPQuantAnalysis
 from VWAPQuantAnalysis import VWAPQuantAnalysis
+
 sys.path.append("../pool")
 from poolFromSinaApi import poolFromSinaApi
-from marketDataGetter import marketDataGetter
+
 sys.path.append("../fetch_data")
-from repoFromTushare import repoFromTushare
+from marketDataGetter import marketDataGetter
 sys.path.append("../tool")
 from Log import Log
 
-import numpy as np
-import MySQLdb
 import datetime
-import time
-import sqlite3
-
 import random
 from repoForAT import repoForAT
 
