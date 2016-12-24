@@ -33,23 +33,42 @@ class AlgoTrading:
     MID_INTERVAL = 2
     LARGE_INTERVAL = 4
 
-    def __init__(self):
+    def __init__(self, rat, pool, repoEngine, findLastDays):
         self.log = Log()
-        self.rat = repoForAT()
-        self.dataGetter = marketDataGetter()
-        self.pool = poolFromSinaApi(self.dataGetter, True)
+        self.rat = rat
+        self.pool = pool
+        self.repoEngine = repoEngine
+        self.findLastDays = findLastDays
+
+    def init_orders(self):
+        quantAnalysisTWAP = TWAPQuantAnalysis()
+        quantAnalysisVWAP = VWAPQuantAnalysis(self.repoEngine)
+        for order in self.rat.extract_uninit_orders():
+            if order.algoChoice == 0:
+                quantAnalysisDict = quantAnalysisTWAP.get_recommend_order_weight(order.stockAmount,
+                                                      order.startTime, order.endTime,
+                                                                                 None)
+            elif order.algoChoice == 1:
+                quantAnalysisDict = quantAnalysisVWAP.get_recommend_order_weight(order.stockAmount,
+                                                      order.startTime, order.endTime,
+                                                                                 self.findLastDays)
+            self.rat.save_qa_result(quantAnalysisDict)
 
 
-    def init_orders(self) 
+
+
 
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
             weight = order.quantAnalysisDict[order.tradeTime]
-            amount = order.stockAmount * weight - order.completedAmount
+            amount = (order.stockAmount * weight - order.completedAmount) // 100
             unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
                                order.tradingType, amount)
-            succAmount, succMoney = self.pool.trade_first_price_order(unit)
+            if order.nextUpdateTime <= order.endTime:
+                succAmount, succMoney = self.pool.trade_first_price_order(unit)
+            else:
+                succAmount, succMoney = self.pool.trade_all_price_order(unit)
             self.rat.post_trade(order.completedAmount+succAmount, order.trunOver+succMoney)
 
 
