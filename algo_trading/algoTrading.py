@@ -25,13 +25,10 @@ import random
 from repoForAT import repoForAT
 
 class AlgoTrading:
-    LOW_TRADE_BOUND = 200
-    HIGH_TRADE_BOUND = 5000
-    LOW_INTERVAL_BOUND = 500
-    HIGH_INTERVAL_BOUND = 2000
-    SMALL_INTERVAL = 1
-    MID_INTERVAL = 2
-    LARGE_INTERVAL = 4
+    TRADE_UNIT = 100
+    LOW_INTERVAL_BOUND = 200
+    HIGH_INTERVAL_BOUND = 1000
+    ZOOM = 2
 
     def __init__(self, rat, pool, repoEngine, findLastDays):
         self.log = Log()
@@ -81,17 +78,18 @@ class AlgoTrading:
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
             aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
             # D
-            if aboutToTrade < LOW_TRADE_BOUND:
+            if aboutToTrade < TRADE_UNIT:
                 order.trdeTime = None
+            elif order.nextUpdateTime > order.endTime:
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp())
             else:
                 order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             # C
-            if aboutToTrade < LOW_INTERVAL_BOUND:
-                order.updateTimeInterval = SMALL_INTERVAL
-            elif aboutToTrade < HIGH_INTERVAL_BOUND:
-                order.updateTimeInterval = MID_INTERVAL
-            else:
-                order.updateTimeInterval = LARGE_INTERVAL
+            if aboutToTrade <= LOW_INTERVAL_BOUND:
+                order.updateTimeInterval = order.updateTimeInterval * ZOOM
+            elif aboutToTrade >= HIGH_INTERVAL_BOUND:
+                if order.updateTimeInterval > 1:
+                    order.updateTimeInterval = order.updateTimeInterval / ZOOM
 
             self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
 
