@@ -18,6 +18,7 @@ from Log import Log
 sys.path.append("../fetch_data")
 from marketDataGetter import marketDataGetter
 from repo import repo
+from tradingRecordSaver import tradingRecordSaver
 
 class mockMarketDataGetter:
     def __init__(self):
@@ -167,5 +168,40 @@ class poolFromSinaApiUnitTest(unittest.TestCase):
         ansTradingUnit = pool.trade_order_sync(testTradingUnit)
 
 
+
+    def test_trade_order_sync_with_pool(self):
+        dataGetter = mockMarketDataGetter()
+        saver = tradingRecordSaver("algotrading", "12345678", None)
+        pool = poolFromSinaApi(dataGetter, True, saver)
+        tradingUnitId = 1
+        stockId = 600000
+        time = datetime.datetime.strptime("2016-12-16 10:00:00" , "%Y-%m-%d %H:%M:%S")
+        buysell = tradingUnit.BUY
+        isSync = True
+        tradingType = tradingUnit.FIRST_PRICE_ORDER 
+        amount = 500
+        # 未超过界限
+        self.log.info("expect see into first price order")
+        testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount)
+        lengthBefore = len(saver.get_history_record())
+        ansTradingUnit = pool.trade_order_sync(testTradingUnit)
+        lengthAfter = len(saver.get_history_record())
+        self.assertEqual(lengthBefore, lengthAfter - 1)
+
+
+
+
+
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
+
+
+
+
+
+

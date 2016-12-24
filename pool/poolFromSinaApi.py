@@ -19,10 +19,11 @@ sys.path.append("../tool")
 from Log import Log
 
 class poolFromSinaApi(poolBase):
-    def __init__(self, dataGetter, isRealTime):
+    def __init__(self, dataGetter, isRealTime, recordSaver = None):
         self.historyTradingList = []
         self.dataGetter = dataGetter
         self.isRealTime = isRealTime
+        self.recordSaver = recordSaver
         self.log = Log()
     
     # 获取交易数据
@@ -49,6 +50,8 @@ class poolFromSinaApi(poolBase):
             self.log.error("trading unit tradingType error")
             return
         tradingUnitOrder.refresh_order(succAmount, succMoney, True)
+        if self.recordSaver != None:
+            self.recordSaver.save_record(tradingUnitOrder)
         return tradingUnitOrder
 
     # 用买/卖1价格成交

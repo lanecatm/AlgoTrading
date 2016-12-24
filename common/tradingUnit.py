@@ -15,6 +15,16 @@ class tradingUnit:
     FIRST_PRICE_ORDER = 1
     ALL_PRICE_ORDER = 2
 
+
+    # param tradingUnitId int
+    # param stockId int
+    # param time datetime
+    # param buysell bool
+    # param isSync bool
+    # param tradingType int
+    # param amount int
+    # param expectPrice double
+    # 请不要输入字任何符串
     def __init__(self, tradingUnitId, stockId, time, buysell, isSync, tradingType, amount, expectPrice = None):
         # 交易单号
         self.tradingUnitId= tradingUnitId
@@ -41,10 +51,16 @@ class tradingUnit:
         # 交易平均每股价格
         self.price = 0
 
+    # param amount int
+    # param money double
+    # param isSuccess bool
     def refresh_order(self, amount, money, isSuccess):
         self.succAmount = amount
         self.succMoney = money
-        self.price = money / amount
+        if amount == 0:
+            self.price = 0
+        else:
+            self.price = money / amount
         self.isSuccess = isSuccess
 
     def toString(self):
@@ -53,3 +69,5 @@ class tradingUnit:
         tradingResult = " isSucc " + str(self.isSuccess) + " succ amount " + str(self.succAmount) + " succ momey " + str(self.succMoney) + " price " + str(self.price)
         return tradingInputInfo + tradingAttribute + tradingResult
 
+    def __str__(self):
+        return self.toString()
