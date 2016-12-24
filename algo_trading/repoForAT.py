@@ -21,51 +21,102 @@ class repoForAT:
         self._mysql_cursor.close()
         self._mysql_db.close()
 
+    # 新增一个order
     # param orderInfo clientOrder
     def insert_order(self, orderInfo):
-        statement = "INSERT INTO algotradingDB.client_orders values("
-    ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
-    STOCKID INT, 
-    STARTTIME DATETIME,
-    ENDTIME DATETIME, 
-    STOCKAMOUNT INT, 
-    BUYSELL INT, 
-    ALGOCHOICE INT, 
-    COMPLETEDAMOUNT INT, 
-    STATUS INT,
-    QUANTANALYSIS MEDIUMTEXT,
-    PROCESSID INT, 
-    UPDATETIME DATETIME,
-    NEXTUPDATETIME DATETIME,
-    UPDATEINTERVAL INT,
-    TRADETIME DATETIME);
+        if orderInfo.quantAnalysisDict == None:
+            quantAnalysisDict = {}
+        else:
+            quantAnalysisDict = orderInfo.quantAnalysisDict
+        if orderId.updateTime == None:
+            updateTime = "NULL"
+        else:
+            updateTime = orderInfo.updateTime.strftime("%Y-%m-%d %H:%M:%S")
+        if orderInfo.nextUpdateTime == None:
+            nextUpdateTime = "NULL"
+        else:
+            nextUpdateTime = orderInfo.nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S")
+        if orderInfo.tradeTime == None:
+            tradeTime ="NULL"
+        else:
+            tradeTime = orderInfo.tradeTime.strftime("%Y-%m-%d %H:%M:%S")
+
+        statement = "INSERT INTO algotradingDB.client_orders values( NULL, "\
+                + str(orderInfo.stockId) + ", "\
+                + orderInfo.startTime.strftime("%Y-%m-%d %H:%M:%S") + ", "\
+                + orderInfo.endTime.strftime("%Y-%m-%d %H:%M:%S") + ", "\
+                + str(orderInfo.stockAmount) + ", "\
+                + str(orderInfo.buySell) + ", "\
+                + str(orderInfo.algoChoice) + ", "\
+                + str(orderInfo.completedAmount) + ", "\
+                + str(orderInfo.status) + ", "\
+                + str(quantAnalysisDict) + ", "\
+                + str(orderInfo.processId) + ", "\
+                + str(updateTime) + ", "\
+                + str(nextUpdateTime) + ", "\
+                + str(orderInfo.updateTimeInterval) + ", "\
+                + str(tradeTime) + ", "\
+                + str(orderInfo.tradingType) + ", "\
+                + str(orderInfo.trunOver) + ", "\
+                + str(orderInfo.avgPrice) + ")"
+        self.log.info("get_final statement : " + sql)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+    
+    # 寻找没有量化分析的单号
+    # return list<clientOrder>
+    def extract_uninit_orders(self):
+        return
 
 
-
-
-
-
-    # 寻找未完成的单号
+    # 寻找未完成需要在当前时间点交易的单号
     # param nowTime datetime
-    def extract_orders(self, nowTime):
+    def extract_trading_orders(self, nowTime):
+        sql = "SELECT * FROM algotradingDB.client_orders WHERE NEXTUPDATETIME < " + nowTime.strftime("%Y-%m-%d %H:%M:%S")\
+                + " AND STATUS < " + str(clientOrder.COMPLERED)
+        self.log.info("extract_trading_orders statement : " + sql)
+        self._mysql_cursor.execute(sql)
+        data = self._mysql_cursor.fetchall()
+        ansList = []
+        for dataUnit in data:
+            clientOrderUnit = clientOrder()
+            clientOrderUnit.create_order_by_sql_list(dataUnit)
+            ansList.append(clientOrderUnit)
+        return ansList
+
+    # 寻找未完成需要在当前时间点更新的单号
+    # param nowTime datetime
+    def extract_refresh_orders(self, nowTime):
+        ansList = []
         sql = "SELECT * FROM algotradingDB.client_orders WHERE COMPLETEDAMOUNT < STOCKAMOUNT"
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)
         data = self._mysql_cursor.fetchall()
-        return data
+        return ansList
 
+    def extract_completed_orders(self, nowTime):
+        ansList = []
+        return ansList
+
+
+    # 更新量化分析结果
+    # status 更新
+    # 量化分析结果
+    # 4个开始执行需要的指标
     # quantanalysis MUST be string
     def save_qa_result(self, orderId, quantanalysis):
         sql = "UPDATE algotradingDB.client_orders SET QUANTANALYSIS = '" + quantanalysis + "' WHERE ID = " + str(orderId)
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)
 
+    # 完成一次交易
     # update the completed amount (and status) after trade
     def post_trade(self, orderId, completed_amount, turnover):
         sql = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount) + ", TURNOVER = " + str(turnover) + ", AVGPRICE = " + str(turnover/completed_amount) + " WHERE ID = " + str(orderId)
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)
 
+    # 更新
     def post_schedule(self, orderId, update_time, next_update_time, time_interval, trade_time):
         sql = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + update_time.strftime("%Y-%m-%d %H:%M:%S") + "', NEXTUPDATETIME = '" + next_update_time.strftime("%Y-%m-%d %H:%M:%S") + "', UPDATEINTERVAL = " + str(time_interval) + ", TRADETIME = '" + trade_time.strftime("%Y-%m-%d %H:%M:%S") + "' WHERE ID = " + str(orderId)
         self.log.info("get_final statement : " + sql)
