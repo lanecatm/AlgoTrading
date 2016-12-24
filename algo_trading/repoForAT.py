@@ -21,7 +21,33 @@ class repoForAT:
         self._mysql_cursor.close()
         self._mysql_db.close()
 
-    def extract_orders(self):
+    # param orderInfo clientOrder
+    def insert_order(self, orderInfo):
+        statement = "INSERT INTO algotradingDB.client_orders values("
+    ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+    STOCKID INT, 
+    STARTTIME DATETIME,
+    ENDTIME DATETIME, 
+    STOCKAMOUNT INT, 
+    BUYSELL INT, 
+    ALGOCHOICE INT, 
+    COMPLETEDAMOUNT INT, 
+    STATUS INT,
+    QUANTANALYSIS MEDIUMTEXT,
+    PROCESSID INT, 
+    UPDATETIME DATETIME,
+    NEXTUPDATETIME DATETIME,
+    UPDATEINTERVAL INT,
+    TRADETIME DATETIME);
+
+
+
+
+
+
+    # 寻找未完成的单号
+    # param nowTime datetime
+    def extract_orders(self, nowTime):
         sql = "SELECT * FROM algotradingDB.client_orders WHERE COMPLETEDAMOUNT < STOCKAMOUNT"
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)

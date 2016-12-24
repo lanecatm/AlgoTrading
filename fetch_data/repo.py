@@ -90,7 +90,7 @@ class repo:
             cursor.close()
 
             # 插入mysql 一条数据
-            statement = "INSERT  O algotradingDB.history_stock_info values ("
+            statement = "INSERT INTO algotradingDB.history_stock_info values ("
             for dataTuple in data[0]:
                 statement = statement + "'"+ str(dataTuple) + "'" + ","
             statement = statement[:-1]
