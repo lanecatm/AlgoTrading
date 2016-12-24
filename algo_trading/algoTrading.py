@@ -30,6 +30,8 @@ class AlgoTrading:
         self.log = Log()
         self.rat = repoForAT()
 
+    def init_orders(self) 
+
     def trade_request(self):
         self.trading_orders = rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
@@ -37,12 +39,19 @@ class AlgoTrading:
             pass
 
     def refresh(self):
-        self.refresh_orders = rat.extract_refresh_orders(datetime.datetime.now())
+        self.refresh_orders = self.rat.extract_refresh_orders(datetime.datetime.now())
         for order in self.refresh_orders:
             order.updateTime = datetime.datetime.now()
+            order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp()+)
-                
+            aboutToTrade = orders.quantAnalysisDict[order.nextUpdateTime - datetime.timedelta(seconds = order.nextUpdateTime.second)]
+            if 
+            self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
+
+    # parameter datetime
+    # output datetime in whole minutes
+    def eraseSeconds(self, )
+ 
 
 
             
