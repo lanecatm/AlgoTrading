@@ -62,7 +62,7 @@ class repoForAT:
                 + str(orderInfo.tradingType) + ", "\
                 + str(orderInfo.trunOver) + ", "\
                 + str(orderInfo.avgPrice) + ")"
-        self.log.info("get_final statement : " + statement)
+        self.log.info("insert statement : " + statement)
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
     
@@ -127,26 +127,56 @@ class repoForAT:
 
 
     # 更新量化分析结果
-    # status 更新
-    # 量化分析结果
-    # 4个开始执行需要的指标
-    # quantanalysis MUST be string
-    def save_qa_result(self, orderId, quantanalysis):
-        sql = "UPDATE algotradingDB.client_orders SET QUANTANALYSIS = '" + quantanalysis + "' WHERE ID = " + str(orderId)
-        self.log.info("get_final statement : " + sql)
-        self._mysql_cursor.execute(sql)
+    # 1. status 更新
+    # 2. 量化分析结果
+    # 3. 4个开始执行需要的指标
+    # Note: quantanalysis 请插入原来的dict,也可以为None, 为None时不更新
+    def save_qa_result(self, orderId, quantanalysis, timeInterval = 1):
+        if quantanalysis == None:
+            return False
+        status = clientOrder.INIT
+        statement = "UPDATE algotradingDB.client_orders SET QUANTANALYSIS = '" + str(quantanalysis) + "', "\
+                + "TRADETIME = NULL, "\
+                + "UPDATETIME = STARTTIME,"\
+                + "NEXTUPDATETIME = STARTTIME, "\
+                + "UPDATEINTERVAL = " + str(timeInterval) + ", "\
+                + "STATUS = " + str(status) + ", "\
+                + "WHERE ID = " + str(orderId)
+        self.log.info("save_qa_result statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+        return True
 
     # 完成一次交易
     # update the completed amount (and status) after trade
     def post_trade(self, orderId, completed_amount, turnover):
-        sql = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount) + ", TURNOVER = " + str(turnover) + ", AVGPRICE = " + str(turnover/completed_amount) + " WHERE ID = " + str(orderId)
-        self.log.info("get_final statement : " + sql)
-        self._mysql_cursor.execute(sql)
+        statement = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount)\
+                + ", TURNOVER = " + str(turnover)\
+                + ", AVGPRICE = " + str(turnover/completed_amount)\
+                + ", TRADETIME = NULL "\
+                + " WHERE ID = " + str(orderId)
+        self.log.info("finish trade statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
 
     # 更新
-    def post_schedule(self, orderId, update_time, next_update_time, time_interval, trade_time):
-        sql = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + update_time.strftime("%Y-%m-%d %H:%M:%S") + "', NEXTUPDATETIME = '" + next_update_time.strftime("%Y-%m-%d %H:%M:%S") + "', UPDATEINTERVAL = " + str(time_interval) + ", TRADETIME = '" + trade_time.strftime("%Y-%m-%d %H:%M:%S") + "' WHERE ID = " + str(orderId)
-        self.log.info("get_final statement : " + sql)
-        self._mysql_cursor.execute(sql)
+    def post_schedule(self, orderId, updateTime, nextUpdateTime, timeInterval, tradeTime):
+        statement = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + updateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
+                + " NEXTUPDATETIME = '" + nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
+                + " UPDATEINTERVAL = " + str(timeInterval) + ", "\
+                + " TRADETIME = '" + tradeTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
+                + " WHERE ID = " + str(orderId)
+        self.log.info("post_schedule statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+
+    # 终结整个交易单
+    def complete_trade(self, orderId):
+        statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)
+                + " WHERE ID = " + str(orderId)
+        self.log.info("complete_trade statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+
 
 
