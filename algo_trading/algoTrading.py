@@ -51,13 +51,15 @@ class AlgoTrading:
             order.updateTime = datetime.datetime.now()
             order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            aboutToTrade = orders.quantAnalysisDict[order.nextUpdateTime - datetime.timedelta(seconds = order.nextUpdateTime.second)]
-            if 
+            aboutToTrade = orders.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
+            if aboutToTrade < 200:
+                order.trdeTime = NULL
             self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
 
     # parameter datetime
     # output datetime in whole minutes
-    def eraseSeconds(self, )
+    def erase_seconds(self, t):
+        return t - timedate.timedelta(seconds = t.second) - timedate.timedelta(microseconds = t.microsecond)
  
 
 
