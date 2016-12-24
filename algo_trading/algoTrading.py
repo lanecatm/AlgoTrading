@@ -8,9 +8,8 @@ sys.path.append("../quant_analysis")
 from TWAPQuantAnalysis import TWAPQuantAnalysis
 from VWAPQuantAnalysis import VWAPQuantAnalysis
 sys.path.append("../pool")
-# import poolFromSinaApi
-from poolFromTushare import poolFromTushare
-from tradingRecordRepo import tradingRecordRepo
+from poolFromSinaApi import poolFromSinaApi
+from marketDataGetter import marketDataGetter
 sys.path.append("../fetch_data")
 from repoFromTushare import repoFromTushare
 sys.path.append("../tool")
@@ -29,12 +28,20 @@ class AlgoTrading:
     def __init__(self):
         self.log = Log()
         self.rat = repoForAT()
+        self.dataGetter = marketDataGetter()
+        self.pool = poolFromSinaApi(self.dataGetter, True)
+
 
     def trade_request(self):
-        self.trading_orders = rat.extract_trading_orders(datetime.datetime.now())
+        self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
-            # Trade and update updateTimeInterval
-            pass
+            weight = order.quantAnalysisDict[order.tradeTime]
+            amount = order.stockAmount * weight - order.completedAmount
+            unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
+                               order.tradingType, amount)
+            succAmount, succMoney = self.pool.trade_first_price_order(unit)
+            self.rat.post_trade(order.completedAmount+succAmount, order.trunOver+succMoney)
+
 
     def refresh(self):
         self.refresh_orders = rat.extract_refresh_orders(datetime.datetime.now())
