@@ -1,5 +1,5 @@
+# -*- encoding:utf-8 -*-
 class clientOrder(object):
-    # def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, timeInterval, completed, status):
     # buy 0 sell 1
     # 0 TWAP 1 VWAP
     UNINIT = 0
@@ -20,7 +20,7 @@ class clientOrder(object):
         # 目前完成的数量 int
         self.completedAmount = 0
         # order 状态 0 未初始化 1 初始化 2 完成
-        self.status = UNINIT
+        self.status = self.UNINIT
         # 量化分析dict
         self.quantAnalysisDict = None
         # 上一次更新时间 datetime
@@ -39,7 +39,7 @@ class clientOrder(object):
         self.avgPrice = 0
 
     def init_order(self, quantAnalysisDict, timeInterval = 1):
-        self.status = INIT
+        self.status = self.INIT
         self.quantAnalysisDict = quantAnalysisDict
         self.updateTime = self.startTime
         self.nextUpdateTime = self.startTime
@@ -61,7 +61,7 @@ class clientOrder(object):
         # BUY or SELL
         self.buySell = sqlList[5]
         # TWAP / VWAP
-        self.algoChoice = sqlList[6]
+        self.algChoice = sqlList[6]
         # 进程id 1
         self.processId = sqlList[10]
         # 交易类型 pool中的
