@@ -140,7 +140,7 @@ class repoForAT:
                 + "UPDATETIME = STARTTIME,"\
                 + "NEXTUPDATETIME = STARTTIME, "\
                 + "UPDATEINTERVAL = " + str(timeInterval) + ", "\
-                + "STATUS = " + str(status) + ", "\
+                + "STATUS = " + str(status) + " "\
                 + "WHERE ID = " + str(orderId)
         self.log.info("save_qa_result statement : " + statement)
         self._mysql_cursor.execute(statement)
@@ -161,6 +161,11 @@ class repoForAT:
 
     # 更新
     def post_schedule(self, orderId, updateTime, nextUpdateTime, timeInterval, tradeTime):
+        if tradeTime == None:
+            tradeTimeStr = "NULL"
+        else:
+            tradeTimeStr = tradeTime.strftime("%Y-%m-%d %H:%M:%S")
+
         statement = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + updateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
                 + " NEXTUPDATETIME = '" + nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
                 + " UPDATEINTERVAL = " + str(timeInterval) + ", "\
@@ -172,7 +177,7 @@ class repoForAT:
 
     # 终结整个交易单
     def complete_trade(self, orderId):
-        statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)
+        statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)\
                 + " WHERE ID = " + str(orderId)
         self.log.info("complete_trade statement : " + statement)
         self._mysql_cursor.execute(statement)
