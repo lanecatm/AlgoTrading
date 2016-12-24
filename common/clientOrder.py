@@ -1,19 +1,19 @@
 class clientOrder(object):
-	# def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, timeInterval, completed, status):
+    # def __init__(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, timeInterval, completed, status):
     # buy 0 sell 1
     # 0 TWAP 1 VWAP
     UNINIT = 0
     INIT = 1
     COMPLERED = 2
 
-	def create_order(self, orderId, stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType):
-		self.orderId = orderId
-		self.stockId = stockId
-		self.startTime = startTime
-		self.endTime = endTime
-		self.stockAmount = stockAmount
-		self.buySell = buysell
-		self.algChoice = algChoice
+    def create_order(self, stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType):
+        self.orderId = None
+        self.stockId = stockId
+        self.startTime = startTime
+        self.endTime = endTime
+        self.stockAmount = stockAmount
+        self.buySell = buysell
+        self.algChoice = algChoice
         self.processId = processId
         self.tradingType = tradingType
 
