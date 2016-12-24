@@ -156,6 +156,75 @@ class repoForATUnitTest(unittest.TestCase):
         newList = repo.extract_completed_orders(datetime.datetime(2016, 12, 13))
         self.assertEqual(len(originList), len(newList))
 
+    def test_save_qa_result(self):
+        repo = repoForAT("algotrading", "12345678", None)
+        # 2016-12-11 10:00
+        # 2016-12-12 11:00
+
+        # 插入order
+        orderInfo = self.new_order()
+        repo.insert_order(orderInfo)
+
+        refreshOrderListBefore = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 10, 00))
+        refreshOrderListBefore2 = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 12, 01))
+        refreshOrderListBefore3 = repo.extract_refresh_orders(datetime.datetime(2016, 12, 13))
+        # order init
+        initOrderList = repo.extract_uninit_orders()
+        for order in initOrderList:
+            orderId = order.orderId 
+            quantAnalysisDict = {1:10}
+            timeInterval = 2
+            repo.save_qa_result(orderId, quantAnalysisDict, timeInterval)
+
+        # 获取更新的列表
+        refreshOrderList = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 10, 00))
+        self.assertEqual(len(refreshOrderListBefore) + len(initOrderList), len(refreshOrderList))
+        refreshOrderList = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 10, 01))
+        self.assertEqual(len(refreshOrderListBefore) + len(initOrderList), len(refreshOrderList))
+        # 更新列表
+        for order in refreshOrderList:
+            self.log.info("refresh order:" + str(order))
+            orderId = order.orderId
+            updateTime = order.nextUpdateTime           
+            nextUpdateTime = datetime.datetime(2016, 12, 11, 12, 00)
+            for tmpOrder in initOrderList:
+                if orderId == tmpOrder.orderId:
+                    self.assertEqual(order.updateTimeInterval, 2)
+            timeInterval = 12
+            tradeTime = datetime.datetime(2016, 12, 11, 11, 30)
+            repo.post_schedule(orderId, updateTime, nextUpdateTime, timeInterval, tradeTime)
+
+        # 寻找待交易列表
+        tradingList = repo.extract_trading_orders(datetime.datetime(2016, 12, 11, 11, 30))
+        for order in tradingList:
+            self.assertEqual(12, order.updateTimeInterval)
+            orderId = order.orderId
+            completed_amount = 10
+            turnover = 10
+            repo.post_trade(orderId, completed_amount, turnover)
+        tradingList = repo.extract_trading_orders(datetime.datetime(2016, 12, 11, 11, 31))
+        self.assertEqual(0, len(tradingList))
+
+        refreshOrderList = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 11, 40))
+        self.assertEqual(0, len(refreshOrderList))
+        for order in refreshOrderList:
+            self.assertEqual(10, order.completedAmount)
+            self.assertEqual(10, order.trunOver)
+        
+        # 第二次更新列表
+        refreshOrderList = repo.extract_refresh_orders(datetime.datetime(2016, 12, 11, 12, 01))
+        self.assertEqual(len(initOrderList) + len(refreshOrderListBefore2), len(refreshOrderList))
+
+        # 完成列表
+        completeOrderList = repo.extract_completed_orders(datetime.datetime(2016, 12, 13))
+        self.assertEqual(len(completeOrderList), len(refreshOrderListBefore3) + len(initOrderList))
+        for order in completeOrderList:
+            repo.complete_trade(order.orderId)
+
+
+
+
+
 
 
 if __name__ == '__main__':

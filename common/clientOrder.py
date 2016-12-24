@@ -89,3 +89,24 @@ class clientOrder(object):
         # 总共交易价格
         self.avgPrice = sqlList[17]
 
+    def __str__(self):
+        ansStr = "order id :" + str(self.orderId)\
+                + " stock id: " + str(self.stockId)\
+                + " start time:" + str(self.startTime)\
+                + " end time:" + str(self.endTime)\
+                + " stock amount:" + str(self.stockAmount)\
+                + " buy sell: " + str(self.buySell)\
+                + " alg choice: " + str(self.algChoice)\
+                + " process id: " + str(self.processId)\
+                + " tradingtype: " + str(self.tradingType)\
+                + " completed amount: " + str(self.completedAmount)\
+                + " status: " + str(self.status)\
+                + " quant analysis: " + str(self.quantAnalysisDict)\
+                + " updatetime: " + str(self.updateTime)\
+                + " nextUpdateTime: " + str(self.nextUpdateTime)\
+                + " updateTimeInterval: " + str(self.updateTimeInterval)\
+                + " tradeTime: " + str(self.tradeTime)\
+                + " turnover: " + str(self.trunOver)\
+                + " avgPrice: " + str(self.avgPrice)
+        return ansStr
+
