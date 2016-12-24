@@ -37,6 +37,7 @@ class AlgoTrading:
         self.repoEngine = repoEngine
         self.findLastDays = findLastDays
 
+
     def init_orders(self):
         quantAnalysisTWAP = TWAPQuantAnalysis()
         quantAnalysisVWAP = VWAPQuantAnalysis(self.repoEngine)
@@ -58,7 +59,7 @@ class AlgoTrading:
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
-            weight = order.quantAnalysisDict[order.tradeTime]
+            weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)]
             amount = (order.stockAmount * weight - order.completedAmount) // 100
             unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
                                order.tradingType, amount)
@@ -78,25 +79,25 @@ class AlgoTrading:
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
             aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
             # D
-            if aboutToTrade < TRADE_UNIT:
+            if aboutToTrade < self.TRADE_UNIT:
                 order.trdeTime = None
             elif order.nextUpdateTime > order.endTime:
-                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp())
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp()))
             else:
                 order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             # C
-            if aboutToTrade <= LOW_INTERVAL_BOUND:
-                order.updateTimeInterval = order.updateTimeInterval * ZOOM
-            elif aboutToTrade >= HIGH_INTERVAL_BOUND:
+            if aboutToTrade <= self.LOW_INTERVAL_BOUND:
+                order.updateTimeInterval = order.updateTimeInterval * self.ZOOM
+            elif aboutToTrade >= self.HIGH_INTERVAL_BOUND:
                 if order.updateTimeInterval > 1:
-                    order.updateTimeInterval = order.updateTimeInterval / ZOOM
+                    order.updateTimeInterval = order.updateTimeInterval / self.ZOOM
 
             self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
 
     # parameter datetime
     # output datetime in whole minutes
     def erase_seconds(self, t):
-        return t - datetime.timedelta(seconds = t.second) - timedate.timedelta(microseconds = t.microsecond)
+        return t - datetime.timedelta(seconds = t.second) - datetime.timedelta(microseconds = t.microsecond)
  
 
 
