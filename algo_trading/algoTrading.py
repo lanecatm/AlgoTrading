@@ -32,6 +32,8 @@ class AlgoTrading:
         self.pool = poolFromSinaApi(self.dataGetter, True)
 
 
+    def init_orders(self) 
+
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
@@ -44,12 +46,21 @@ class AlgoTrading:
 
 
     def refresh(self):
-        self.refresh_orders = rat.extract_refresh_orders(datetime.datetime.now())
+        self.refresh_orders = self.rat.extract_refresh_orders(datetime.datetime.now())
         for order in self.refresh_orders:
             order.updateTime = datetime.datetime.now()
+            order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp()+)
-                
+            aboutToTrade = orders.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - orders.completedAmount
+            if aboutToTrade < 200:
+                order.trdeTime = NULL
+            self.rat.post_schedule(order.orderId, order.updateTime, order.nextUpdateTime, order.updateTimeInterval, order.tradeTime)
+
+    # parameter datetime
+    # output datetime in whole minutes
+    def erase_seconds(self, t):
+        return t - timedate.timedelta(seconds = t.second) - timedate.timedelta(microseconds = t.microsecond)
+ 
 
 
             
