@@ -35,13 +35,13 @@ class repoForAT:
         self._mysql_cursor.execute(sql)
 
     # update the completed amount (and status) after trade
-    def post_trade(self, orderId, completed_amount):
-        sql = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount) + " WHERE ID = " + str(orderId)
+    def post_trade(self, orderId, completed_amount, turnover):
+        sql = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount) + ", TURNOVER = " + str(turnover) + ", AVGPRICE = " + str(turnover/completed_amount) + " WHERE ID = " + str(orderId)
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)
 
     def post_schedule(self, orderId, update_time, next_update_time, time_interval, trade_time):
-        sql = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + update_time.strftime("%Y-%m-%d %H:%M:%S") + "', NEXTUPDATETIME = '" + next_update_time.strftime("%Y-%m-%d %H:%M:%S") + "', UPDATEINTERVAL = '" + time_interval.strftime("%H:%M:%S") + "', TRADETIME = '" + trade_time.strftime("%Y-%m-%d %H:%M:%S") + "' WHERE ID = " + str(orderId)
+        sql = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + update_time.strftime("%Y-%m-%d %H:%M:%S") + "', NEXTUPDATETIME = '" + next_update_time.strftime("%Y-%m-%d %H:%M:%S") + "', UPDATEINTERVAL = " + str(time_interval) + ", TRADETIME = '" + trade_time.strftime("%Y-%m-%d %H:%M:%S") + "' WHERE ID = " + str(orderId)
         self.log.info("get_final statement : " + sql)
         self._mysql_cursor.execute(sql)
 
