@@ -19,6 +19,7 @@ from Log import Log
 
 import datetime
 import random
+import time
 from repoForAT import repoForAT
 
 class AlgoTrading:
@@ -27,24 +28,23 @@ class AlgoTrading:
     HIGH_INTERVAL_BOUND = 1000
     ZOOM = 2
 
-    def __init__(self, rat, pool, repoEngine, findLastDays):
+    def __init__(self, rat, pool, repoEngine, findLastDays, quantAnalysisTWAP, quantAnalysisVWAP):
         self.log = Log()
         self.rat = rat
         self.pool = pool
-        self.repoEngine = repoEngine
         self.findLastDays = findLastDays
+        self.quantAnalysisTWAP = quantAnalysisTWAP
+        self.quantAnalysisVWAP = quantAnalysisVWAP
 
 
     def init_orders(self):
-        quantAnalysisTWAP = TWAPQuantAnalysis()
-        quantAnalysisVWAP = VWAPQuantAnalysis(self.repoEngine)
         for order in self.rat.extract_uninit_orders():
             if order.algoChoice == 0:
-                quantAnalysisDict = quantAnalysisTWAP.get_recommend_order_weight(order.stockAmount,
+                quantAnalysisDict = self.quantAnalysisTWAP.get_recommend_order_weight(order.stockAmount,
                                                                                  order.startTime, order.endTime,
                                                                                  None)
             elif order.algoChoice == 1:
-                quantAnalysisDict = quantAnalysisVWAP.get_recommend_order_weight(order.stockAmount,
+                quantAnalysisDict = self.quantAnalysisVWAP.get_recommend_order_weight(order.stockAmount,
                                                                                  order.startTime, order.endTime,
                                                                                  self.findLastDays)
 
@@ -58,15 +58,16 @@ class AlgoTrading:
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
         for order in self.trading_orders:
-            weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)]
-            amount = (order.stockAmount * weight - order.completedAmount) // 100
-            unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
-                               order.tradingType, amount)
-            if order.nextUpdateTime <= order.endTime:
-                succAmount, succMoney = self.pool.trade_first_price_order(unit)
-            else:
-                succAmount, succMoney = self.pool.trade_all_price_order(unit)
-            self.rat.post_trade(order.completedAmount+succAmount, order.trunOver+succMoney)
+            if self.erase_seconds(datetime.datetime.now())==self.erase_seconds(order.nextUpdateTime):
+                weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)]
+                amount = (order.stockAmount * weight - order.completedAmount) // 100
+                unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
+                                   order.tradingType, amount)
+                if order.nextUpdateTime <= order.endTime:
+                    succAmount, succMoney = self.pool.trade_first_price_order(unit)
+                else:
+                    succAmount, succMoney = self.pool.trade_all_price_order(unit)
+                self.rat.post_trade(order.completedAmount + succAmount, order.trunOver + succMoney)
 
 
     def refresh(self):
@@ -102,17 +103,24 @@ class AlgoTrading:
 class repoTest:
     pass
 
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         t = 0
     else:
-        t = argv[1]
+        t = sys.argv[1]
     rat = repoForAT('algotrading', '12345678', None, None)
+    dataGetter = marketDataGetter()
+    pool = poolFromSinaApi(dataGetter, True)
+    repoEngine = repoTest()
+    findLastdays = 7
 
-    
-    at = AlgoTrading()
-
+    at = AlgoTrading(rat, pool, repoEngine, findLastdays)
+    at.init_orders()
     while 1:
+        at.refresh()
+        at.trade_request()
+        at.complete_order()
         time.sleep(t)
 
 
