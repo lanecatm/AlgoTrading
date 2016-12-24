@@ -172,8 +172,8 @@ class repoForAT:
 
     # 终结整个交易单
     def complete_trade(self, orderId):
-        statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)
-                + " WHERE ID = " + str(orderId)
+        statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)\
+                    + " WHERE ID = " + str(orderId)
         self.log.info("complete_trade statement : " + statement)
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()

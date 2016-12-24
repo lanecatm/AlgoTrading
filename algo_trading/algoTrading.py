@@ -4,23 +4,20 @@ sys.path.append("../common/")
 import clientOrder
 import orderResult
 from tradingUnit import tradingUnit
+
 sys.path.append("../quant_analysis")
 from TWAPQuantAnalysis import TWAPQuantAnalysis
 from VWAPQuantAnalysis import VWAPQuantAnalysis
+
 sys.path.append("../pool")
 from poolFromSinaApi import poolFromSinaApi
-from marketDataGetter import marketDataGetter
+
 sys.path.append("../fetch_data")
-from repoFromTushare import repoFromTushare
+from marketDataGetter import marketDataGetter
 sys.path.append("../tool")
 from Log import Log
 
-import numpy as np
-import MySQLdb
 import datetime
-import time
-import sqlite3
-
 import random
 from repoForAT import repoForAT
 
@@ -44,17 +41,19 @@ class AlgoTrading:
         for order in self.rat.extract_uninit_orders():
             if order.algoChoice == 0:
                 quantAnalysisDict = quantAnalysisTWAP.get_recommend_order_weight(order.stockAmount,
-                                                      order.startTime, order.endTime,
+                                                                                 order.startTime, order.endTime,
                                                                                  None)
             elif order.algoChoice == 1:
                 quantAnalysisDict = quantAnalysisVWAP.get_recommend_order_weight(order.stockAmount,
-                                                      order.startTime, order.endTime,
+                                                                                 order.startTime, order.endTime,
                                                                                  self.findLastDays)
+
             self.rat.save_qa_result(quantAnalysisDict)
 
 
-
-
+    def complete_order(self):
+        for order in self.rat.extract_completed_orders(datetime.datetime.now()):
+            self.rat.complete_trade(order.orderId)
 
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(datetime.datetime.now())
