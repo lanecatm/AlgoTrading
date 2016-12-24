@@ -82,9 +82,11 @@ class AlgoTrading:
             if aboutToTrade < self.TRADE_UNIT:
                 order.trdeTime = None
             elif order.nextUpdateTime > order.endTime:
-                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp()))
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp()
+                        + random.random() * (order.endTime.timestamp() - order.updateTime.timestamp()))
             else:
-                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() + random.random() * 60 * order.updateTimeInterval)
+                order.tradeTime = datetime.fromtimestamp(order.updateTime.timestamp() 
+                        + random.random() * 60 * order.updateTimeInterval)
             # C
             if aboutToTrade <= self.LOW_INTERVAL_BOUND:
                 order.updateTimeInterval = order.updateTimeInterval * self.ZOOM
@@ -116,8 +118,8 @@ if __name__ == '__main__':
     findLastdays = 7
 
     at = AlgoTrading(rat, pool, repoEngine, findLastdays)
-    at.init_orders()
     while 1:
+        at.init_orders()
         at.refresh()
         at.trade_request()
         at.complete_order()
