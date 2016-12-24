@@ -4,7 +4,7 @@ class clientOrder(object):
     # 0 TWAP 1 VWAP
     UNINIT = 0
     INIT = 1
-    COMPLERED = 2
+    COMPLETED = 2
 
     def create_order(self, stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType):
         self.orderId = None
