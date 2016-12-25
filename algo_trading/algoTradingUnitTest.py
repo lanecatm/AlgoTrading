@@ -51,8 +51,8 @@ class algoTradingUnitTest(unittest.TestCase):
         stockId = 600000
         startTime = datetime.datetime(2016, 12, 11, 10, 00)
         endTime = datetime.datetime(2016, 12, 12, 11, 00)
-        stockAmount = 10
-        buysell = 10
+        stockAmount = 10000
+        buysell = 1
         algChoice = 0
         processId = 1
         tradingType = 1
