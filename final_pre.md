@@ -46,7 +46,7 @@ AlgoTraidng
 
 ## Features
 - Volume Prediction
-- Active Tradind Strategy
+- Active Trading Strategy
 - Realtime Pool / Back-test Pool/ Internal Pool
 - Data 
 - Monitor
