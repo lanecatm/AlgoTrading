@@ -51,7 +51,7 @@ class AlgoTrading:
             self.rat.save_qa_result(quantAnalysisDict)
 
 
-    def complete_order(self):
+    def complete_orders(self):
         for order in self.rat.extract_completed_orders(datetime.datetime.now()):
             self.rat.complete_trade(order.orderId)
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         at.init_orders()
         at.refresh()
         at.trade_request()
-        at.complete_order()
+        at.complete_orders()
         time.sleep(t)
 
 
