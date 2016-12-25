@@ -9,7 +9,7 @@
 - MySQL
  
 ```
-AlgoTraidng
+AlgoTrading
 ├── algo_trading
 │   ├── algoTrading.py
 │   └── repoForAT.py
