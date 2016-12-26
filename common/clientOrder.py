@@ -2,9 +2,20 @@
 class clientOrder(object):
     # buy 0 sell 1
     # 0 TWAP 1 VWAP
+
+    # STATUS
     UNINIT = 0
     INIT = 1
     COMPLETED = 2
+
+    # algChoice
+    TWAP = 0
+    VWAP = 1
+    LINEARVWAP = 2
+
+    # tradingType
+    
+
 
     def create_order(self, stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType):
         self.orderId = None
