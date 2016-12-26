@@ -7,7 +7,7 @@
 ## System Design / Components
 - Python 
 - MySQL
- 
+
 ```
 AlgoTrading
 ├── algo_trading  
@@ -40,11 +40,12 @@ AlgoTrading
     ├── FileUtility.py
     └── Log.py
 ```
+![asdf](./architecture.png)
 
-## Challanges & Solutions
+## Challenges & Solutions
 - Data feed
-	* crawl market data
-	* sqlite to MySQL
+  * crawl market data
+  * sqlite to MySQL
 - Trading Strategy
 
 ## Features
@@ -61,6 +62,5 @@ AlgoTrading
 # Demo (10 min)
 1. GUI
 2. Start algoTrading
-2. Place pruchase order
-3. Execute order
-4. 
+3. Place purchase order
+4. Execute order
