@@ -26,7 +26,7 @@ class tradingUnit:
     # param expectPrice double
     # 请不要输入字任何符串
     def __init__(self, tradingUnitId, stockId, time, buysell, isSync, tradingType, amount, expectPrice = None):
-        # 交易单号
+        # 交易单号 大单号
         self.tradingUnitId= tradingUnitId
         # 交易的股票id int
         self.stockId = stockId

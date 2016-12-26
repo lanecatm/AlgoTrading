@@ -71,6 +71,10 @@ class MockRepoFroAT():
         self.completeOrderNowTimeMinuteList = []
         self.completedAmountList = []
         self.completedMoneyList = []
+        self.postScheduleUpdateTimeList = []
+        self.postScheduleNextUpdateTimeList = []
+        self.postScheduleTimeInterval = []
+        self.postScheduleTradeTime = []
 
     def refresh(self):
         self.callUninitTime = 0
@@ -85,6 +89,10 @@ class MockRepoFroAT():
         self.completeOrderNowTimeMinuteList = []
         self.completedAmountList = []
         self.completedMoneyList = []
+        self.postScheduleUpdateTimeList = []
+        self.postScheduleNextUpdateTimeList = []
+        self.postScheduleTimeInterval = []
+        self.postScheduleTradeTime = []
 
 
 
@@ -145,9 +153,9 @@ class MockRepoFroAT():
     def extract_refresh_orders(self, nowTime):
         self.callRefreshTime = self.callRefreshTime + 1
         stockId = 600000
-        startTime = datetime.datetime(2016,12,25,11,00,12)
-        endTime = datetime.datetime(2016, 12, 25, 12, 06, 12)
-        stockAmount = 10000
+        startTime = datetime.datetime(2016, 12, 25, 11, 59)
+        endTime = datetime.datetime(2016, 12, 25, 12, 8)
+        stockAmount = 2000
         buysell = tradingUnit.BUY
         algChoice = clientOrder.TWAP
         processId = 1
@@ -155,10 +163,12 @@ class MockRepoFroAT():
         order1 = clientOrder()
         order1.create_order(stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType)
         order1.orderId = 10
-        order1.init_order({"2016-12-25 12:00:00": 0.1, "2016-12-25 12:01:00": 0.2,"2016-12-25 12:02:00": 0.4,"2016-12-25 12:03:00": 0.9,"2016-12-25 12:04:00": 0.95,"2016-12-25 12:05:00": 1.0})
-        order1.tradeTime = nowTime
-        order1.nextUpdateTime = nowTime + datetime.timedelta(minutes = 1)
-        order1.completedAmount = MockPool.nowCompleteAmount
+        order1.init_order({"2016-12-25 11:59:00": 0.01, "2016-12-25 12:00:00": 0.02, "2016-12-25 12:01:00": 0.2,"2016-12-25 12:03:00": 0.4,"2016-12-25 12:04:00": 0.9,"2016-12-25 12:05:00": 0.95,"2016-12-25 12:06:00": 0.96, "2016-12-25 12:07:00": 1})
+        order1.completedAmount = int(order1.quantAnalysisDict[nowTime.strftime("%Y-%m-%d %H:%M:00")] * stockAmount/100) * 100
+        if len(self.postScheduleTimeInterval) > 0:
+            order1.updateTimeInterval = self.postScheduleTimeInterval[-1]
+        else:
+            order1.updateTimeInterval = 1
         self.log.info("mock extract trading order:" + str(order1))
 
         return [order1]
@@ -197,6 +207,10 @@ class MockRepoFroAT():
 
     def post_schedule(self, orderId, updateTime, nextUpdateTime, timeInterval, tradeTime):
         self.callPostSchedule = self.callPostSchedule + 1
+        self.postScheduleUpdateTimeList.append(updateTime)
+        self.postScheduleNextUpdateTimeList.append(nextUpdateTime)
+        self.postScheduleTimeInterval.append(timeInterval)
+        self.postScheduleTradeTime.append(tradeTime)
         return
 
     def complete_trade(self, orderId):
@@ -329,12 +343,49 @@ class algoTradingUnitTest(unittest.TestCase):
 
     def test_refresh(self):
         algoTradingEngine = self.new_algoTrading()
-        nowTime = datetime.datetime(2016, 12, 25, 11, 59, 00)
+
+        nowTime = datetime.datetime(2016, 12, 25, 11, 59)
         algoTradingEngine.set_time(nowTime)
         algoTradingEngine.refresh()
         self.assertEquals(self.rat.callRefreshTime, 1)
         self.assertEquals(self.rat.callPostSchedule, 1)
+        self.assertEquals(self.rat.postScheduleTradeTime[0], None)
+        self.assertEquals(self.rat.postScheduleNextUpdateTimeList[0], datetime.datetime(2016, 12, 25, 12))
+        self.assertEquals(self.rat.postScheduleTimeInterval[0], 2)
     
+        nowTime = self.rat.postScheduleNextUpdateTimeList[0]
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.refresh()
+        self.assertEquals(self.rat.callRefreshTime, 2)
+        self.assertEquals(self.rat.callPostSchedule, 2)
+        self.assertEquals(self.rat.postScheduleNextUpdateTimeList[1], datetime.datetime(2016, 12, 25, 12, 3))
+        self.assertEquals(self.rat.postScheduleTimeInterval[1], 2)
+
+        nowTime = self.rat.postScheduleNextUpdateTimeList[1]
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.refresh()
+        self.assertEquals(self.rat.callRefreshTime, 3)
+        self.assertEquals(self.rat.callPostSchedule, 3)
+        self.assertEquals(self.rat.postScheduleNextUpdateTimeList[2], datetime.datetime(2016, 12, 25, 12, 5))
+        self.assertEquals(self.rat.postScheduleTimeInterval[2], 1)
+
+        nowTime = self.rat.postScheduleNextUpdateTimeList[2]
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.refresh()
+        self.assertEquals(self.rat.callRefreshTime, 4)
+        self.assertEquals(self.rat.callPostSchedule, 4)
+        self.assertEquals(self.rat.postScheduleNextUpdateTimeList[3], datetime.datetime(2016, 12, 25, 12, 6))
+        self.assertEquals(self.rat.postScheduleTimeInterval[3], 2)
+
+
+        nowTime = self.rat.postScheduleNextUpdateTimeList[3]
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.refresh()
+        self.assertEquals(self.rat.callRefreshTime, 5)
+        self.assertEquals(self.rat.callPostSchedule, 5)
+        self.assertEquals(self.rat.postScheduleNextUpdateTimeList[4], datetime.datetime(2016, 12, 25, 12, 8))
+
+
 
 if __name__ == '__main__':
     unittest.main()
