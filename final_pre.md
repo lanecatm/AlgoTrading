@@ -40,6 +40,7 @@ AlgoTrading
     ├── FileUtility.py
     └── Log.py
 ```
+![asdf](./architecture.png)
 
 ## Challanges & Solutions
 - Data feed
