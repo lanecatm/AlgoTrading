@@ -34,9 +34,9 @@ class TWAPQuantAnalysis(quantAnalysisBase):
         return timeList
 
 
-    # TODO 检查可以交易的时间点
     def get_recommend_order_weight(self, stockId, startTime, endTime, findLastDays):
         ansWeightList = []
+        # 检查可以交易的时间点
         tradingTimeList = self.find_trading_time(startTime, endTime)
         tradingTimes = len(tradingTimeList)
         if tradingTimes == 0:
