@@ -1,3 +1,4 @@
+# -*- encoding:utf-8 -*-
 import sys
 #sys.path.append("../cli/")
 sys.path.append("../common/")
@@ -67,18 +68,29 @@ class AlgoTrading:
     def trade_request(self):
         self.trading_orders = self.rat.extract_trading_orders(self.nowTime)
         for order in self.trading_orders:
+            self.log.info("trading request:" + str(order))
             #if self.erase_seconds(self.nowTime) == self.erase_seconds(order.nextUpdateTime):
-            weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime).strftime("%Y-%m-%d %H:%M:00")]
-            self.log.info("quant analysis weight: " + str(weight))
-            amount = (order.stockAmount * weight - order.completedAmount) // 100
-            self.log.info("calculated amount:" + str(amount))
-            unit = tradingUnit(order.orderId, order.stockId, order.buySell, True,
-                               order.tradingType, amount)
-            if order.nextUpdateTime <= order.endTime:
-                succAmount, succMoney = self.pool.trade_first_price_order(unit)
+            # 有nextUpdateTime的情况
+            # TODO 没有的话为1
+            if order.nextUpdateTime < order.endTime:
+                self.log.info("order.quantAnalysisDict:" + str(order.quantAnalysisDict))
+                weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime).strftime("%Y-%m-%d %H:%M:00")]
+                self.log.info("quant analysis weight: " + str(weight))
+                amount = int((order.stockAmount * weight - order.completedAmount)/100) * 100
+                self.log.info("completed amount:" + str(order.completedAmount))
+                self.log.info("calculated amount:" + str(amount))
+                unit = tradingUnit(order.orderId, order.stockId, self.nowTime, order.buySell, True, tradingUnit.FIRST_PRICE_ORDER, amount)
+                succTradingUnit = self.pool.trade_order_sync(unit)
+                succAmount = succTradingUnit.succAmount
+                succMoney = succTradingUnit.succMoney
             else:
-                succAmount, succMoney = self.pool.trade_all_price_order(unit)
-            self.rat.post_trade(order.completedAmount + succAmount, order.trunOver + succMoney)
+                amount = int((order.stockAmount - order.completedAmount)/100) * 100
+                self.log.info("calculated amount:" + str(amount))
+                unit = tradingUnit(order.orderId, order.stockId, self.nowTime, order.buySell, True, tradingUnit.ALL_PRICE_ORDER, amount)
+                succTradingUnit = self.pool.trade_order_sync(unit)
+                succAmount = succTradingUnit.succAmount
+                succMoney = succTradingUnit.succMoney
+            self.rat.post_trade(order.orderId, order.completedAmount + succAmount, order.trunOver + succMoney)
 
 
     # TODO change timepoint to dict time
@@ -89,12 +101,13 @@ class AlgoTrading:
             order.updateTime = self.nowTime
             # B
             order.nextUpdateTime = order.updateTime + datetime.timedelta(minutes = order.updateTimeInterval)
-            aboutToTrade = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime)] - order.completedAmount
+            weight = order.quantAnalysisDict[self.erase_seconds(order.nextUpdateTime).strftime("%Y-%m-%d %H:%M:00")]
+            aboutToTrade = weight * order.stockAmount - order.completedAmount
             # D
             if aboutToTrade < self.TRADE_UNIT:
                 order.trdeTime = None
-            elif order.nextUpdateTime > order.endTime:
-                order.tradeTime = self.random_trading_time(order.updateTime, endTime.timestamp() - order.updateTime.timestamp())
+            elif order.nextUpdateTime >= order.endTime:
+                order.tradeTime = self.random_trading_time(order.updateTime, (endTime - order.updateTime).seconds / 60)
             else:
                 order.tradeTime = self.random_trading_time(order.updateTime, order.updateTimeInterval)
             # C

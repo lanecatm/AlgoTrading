@@ -18,16 +18,23 @@ sys.path.append("../tool/")
 from Log import Log
 
 class MockPool():
+    nowCompleteAmount = 0
     def __init__(self):
         self.log = Log()
         self.firstTime = 0
         self.allTime = 0
+        MockPool.nowCompleteAmount = 0
 
     def trade_order_sync(self, tradingUnitOrder):
-        if tradingUnitOrder.tradingTpye == tradingUnit.ALL_PRICE_ORDER:
+        if tradingUnitOrder.tradingType == tradingUnit.ALL_PRICE_ORDER:
             self.allTime = self.allTime + 1
         if tradingUnitOrder.tradingType == tradingUnit.FIRST_PRICE_ORDER:
             self.firstTime = self.firstTime + 1
+        tradingUnitOrder.succAmount = tradingUnitOrder.amount * 0.5
+        tradingUnitOrder.succMoney = tradingUnitOrder.succAmount * 10
+        MockPool.nowCompleteAmount = MockPool.nowCompleteAmount + tradingUnitOrder.succAmount
+        return tradingUnitOrder
+
     def refresh(self):
         self.firstTime = 0
         self.allTime = 0
@@ -62,6 +69,8 @@ class MockRepoFroAT():
         self.callCompleteTrade = 0
         self.saveQAList = []
         self.completeOrderNowTimeMinuteList = []
+        self.completedAmountList = []
+        self.completedMoneyList = []
 
     def refresh(self):
         self.callUninitTime = 0
@@ -74,6 +83,8 @@ class MockRepoFroAT():
         self.callCompleteTrade = 0
         self.saveQAList = []
         self.completeOrderNowTimeMinuteList = []
+        self.completedAmountList = []
+        self.completedMoneyList = []
 
 
 
@@ -114,9 +125,9 @@ class MockRepoFroAT():
     def extract_trading_orders(self, nowTime):
         self.callTradingTime = self.callTradingTime + 1
         stockId = 600000
-        startTime = datetime.datetime(2016,12,25,12,12,12)
-        endTime = datetime.datetime(2016, 12, 26, 12, 12, 12)
-        stockAmount = 1
+        startTime = datetime.datetime(2016,12,25,11,00,12)
+        endTime = datetime.datetime(2016, 12, 25, 12, 06, 12)
+        stockAmount = 10000
         buysell = tradingUnit.BUY
         algChoice = clientOrder.TWAP
         processId = 1
@@ -125,13 +136,32 @@ class MockRepoFroAT():
         order1.create_order(stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType)
         order1.orderId = 10
         order1.init_order({"2016-12-25 12:00:00": 0.1, "2016-12-25 12:01:00": 0.2,"2016-12-25 12:02:00": 0.4,"2016-12-25 12:03:00": 0.9,"2016-12-25 12:04:00": 0.95,"2016-12-25 12:05:00": 1.0})
-
-
-        return
+        order1.tradeTime = nowTime
+        order1.nextUpdateTime = nowTime + datetime.timedelta(minutes = 1)
+        order1.completedAmount = MockPool.nowCompleteAmount
+        self.log.info("mock extract trading order:" + str(order1))
+        return [order1]
 
     def extract_refresh_orders(self, nowTime):
         self.callRefreshTime = self.callRefreshTime + 1
-        return
+        stockId = 600000
+        startTime = datetime.datetime(2016,12,25,11,00,12)
+        endTime = datetime.datetime(2016, 12, 25, 12, 06, 12)
+        stockAmount = 10000
+        buysell = tradingUnit.BUY
+        algChoice = clientOrder.TWAP
+        processId = 1
+        tradingType = 1
+        order1 = clientOrder()
+        order1.create_order(stockId, startTime, endTime, stockAmount, buysell, algChoice, processId, tradingType)
+        order1.orderId = 10
+        order1.init_order({"2016-12-25 12:00:00": 0.1, "2016-12-25 12:01:00": 0.2,"2016-12-25 12:02:00": 0.4,"2016-12-25 12:03:00": 0.9,"2016-12-25 12:04:00": 0.95,"2016-12-25 12:05:00": 1.0})
+        order1.tradeTime = nowTime
+        order1.nextUpdateTime = nowTime + datetime.timedelta(minutes = 1)
+        order1.completedAmount = MockPool.nowCompleteAmount
+        self.log.info("mock extract trading order:" + str(order1))
+
+        return [order1]
 
     def extract_completed_orders(self, nowTime):
         self.callCompleteTime = self.callCompleteTime + 1
@@ -161,6 +191,8 @@ class MockRepoFroAT():
 
     def post_trade(self, orderId, completed_amount, turnover):
         self.callPostTrade = self.callPostTrade + 1
+        self.completedAmountList.append(completed_amount)
+        self.completedMoneyList.append(turnover)
         return
 
     def post_schedule(self, orderId, updateTime, nextUpdateTime, timeInterval, tradeTime):
@@ -282,13 +314,30 @@ class algoTradingUnitTest(unittest.TestCase):
 
     def test_trade_request(self):
         algoTradingEngine = self.new_algoTrading()
-        nowTime = datetime.datetime(2016, 12, 24, 12, 12, 00)
+        nowTime = datetime.datetime(2016, 12, 25, 11, 59, 00)
         algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.trade_request()
+        nowTime = datetime.datetime(2016, 12, 25, 12, 1, 00)
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.trade_request()
+        nowTime = datetime.datetime(2016, 12, 25, 12, 6, 00)
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.trade_request()
+        self.assertEquals(self.pool.firstTime, 2)
+        self.assertEquals(self.pool.allTime, 1)
         
-        pass
 
     def test_refresh(self):
-        pass
+        algoTradingEngine = self.new_algoTrading()
+        nowTime = datetime.datetime(2016, 12, 25, 11, 59, 00)
+        algoTradingEngine.set_time(nowTime)
+        algoTradingEngine.refresh()
+        self.assertEquals(self.rat.callRefreshTime, 1)
+        self.assertEquals(self.rat.callPostSchedule, 1)
+    
 
 if __name__ == '__main__':
     unittest.main()
+    #suite = unittest.TestSuite()  
+    #suite.addTest(algoTradingUnitTest('test_trade_request'))  
+    #unittest.TextTestRunner(verbosity=1).run(suite)  
