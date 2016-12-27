@@ -44,9 +44,9 @@ AlgoTrading
 
 ## Challenges & Solutions
 - Data feed
-  * crawl market data:
-    * SinaAPI
-    * 600000 601006 601377
+  - crawl market data:
+    - SinaAPI
+    - 600000 601006 601377
 - Volume Prediction
   - Simple Moving Average
   - Linear Weighted Moving Average
