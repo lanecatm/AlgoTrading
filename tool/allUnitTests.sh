@@ -1,14 +1,23 @@
 cd ../algo_trading/
-python algoTradingUnitTest.py
-python repoForATUnitTest.py
+echo algoTradingUnitTest
+python algoTradingUnitTest.py | grep error
+echo repoForATUnitTest
+python repoForATUnitTest.py | grep error
 cd ../common/
-python MarketDataUnittest.py
+#echo MarketDataUnittest
+#python MarketDataUnittest.py | grep error
 cd ../pool/
-python poolFromSinaApiUnitTest.py
-python tradingRecordSaverUnitTest.py 
+echo poolFromSinaApiUnitTest
+python poolFromSinaApiUnitTest.py| grep error
+echo tradingRecordSaverUnitTest
+python tradingRecordSaverUnitTest.py | grep error
 cd ../quant_analysis/
-python LinearVWAPQuantAnalysisUnitTest.py
-python TWAPQuantAnalysisUnitTest.py
-python VWAPQuantAnalysisUnitTest.py
-python quantAnalysisBaseUnitTest.py
+echo LinearVWAPQuantAnalysisUnitTest
+python LinearVWAPQuantAnalysisUnitTest.py| grep error
+echo TWAPQuantAnalysisUnitTest
+python TWAPQuantAnalysisUnitTest.py| grep error
+echo VWAPQuantAnalysisUnitTest
+python VWAPQuantAnalysisUnitTest.py| grep error
+echo quantAnalysisBaseUnitTest
+python quantAnalysisBaseUnitTest.py| grep error
 cd ..
