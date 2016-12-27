@@ -44,10 +44,15 @@ AlgoTrading
 
 ## Challenges & Solutions
 - Data feed
-  * crawl market data
-  * sqlite to MySQL
-- Volumn Prediction
+  * crawl market data:
+    * SinaAPI
+    * 600000 601006 601377
+- Volume Prediction
+  - Simple Moving Average
+  - Linear Weighted Moving Average
 - Trading Strategy
+  - Frequency Auto-adjustment Inspired by Congestion avoidance
+    - Exponential growth / fall
 
 ## Features
 - Volume/Price Prediction
