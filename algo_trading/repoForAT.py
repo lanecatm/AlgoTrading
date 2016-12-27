@@ -65,7 +65,15 @@ class repoForAT:
         self.log.info("insert statement : " + statement)
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
-    
+
+    # 删除指定单号的订单
+    # param orderId int
+    def delete_order(self, orderId):
+        statement = "DELETE FROM algotradingDB.client_orders WHERE ID = " + str(orderId)
+        self.log.info("delete_order statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+
     # 寻找没有量化分析的单号
     # return list<clientOrder>
     def extract_uninit_orders(self):
