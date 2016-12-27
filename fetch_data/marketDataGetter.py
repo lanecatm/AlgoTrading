@@ -6,8 +6,8 @@ import sys
 sys.path.append("../tool")
 from Log import Log
 class marketDataGetter:
-    def __init__(self):
-        self.log = Log()
+    def __init__(self, isOpenLog = True):
+        self.log = Log(isOpenLog)
         return
 
     # old stock id 601006

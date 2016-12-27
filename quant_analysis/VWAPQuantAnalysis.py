@@ -15,9 +15,9 @@ from Log import Log
 
 class VWAPQuantAnalysis(quantAnalysisBase):
 
-    def __init__(self, repoEngine):
+    def __init__(self, repoEngine, isOpenLog = True):
         self.repoEngine = repoEngine
-        self.log = Log()
+        self.log = Log(isOpenLog)
         return
     
     # 得到预测的每日下单量列表

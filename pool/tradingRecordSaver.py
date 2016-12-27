@@ -15,13 +15,13 @@ import datetime
 sys.path.append("../tool")
 from Log import Log
 class tradingRecordSaver:
-    def __init__(self, user, password, ip):
+    def __init__(self, user, password, ip, isOpenLog = True):
         if ip==None:
             self._mysql_db = MySQLdb.connect("localhost", user, password, "algotradingDB")
         else:
             self._mysql_db = MySQLdb.connect(ip, user, password, "algotradingDB")
         self._mysql_cursor = self._mysql_db.cursor()
-        self.log = Log()
+        self.log = Log(isOpenLog)
 
     def __del__(self):
         self._mysql_cursor.close()

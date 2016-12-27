@@ -14,8 +14,8 @@ from Log import Log
 from quantAnalysisBase import quantAnalysisBase
 
 class TWAPQuantAnalysis(quantAnalysisBase):
-    def __init__(self):
-        self.log = Log()
+    def __init__(self, isOpenLog = True):
+        self.log = Log(isOpenLog)
         return
     
     # 包含开始，不包含结束时间

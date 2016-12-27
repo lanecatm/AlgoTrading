@@ -19,12 +19,13 @@ sys.path.append("../tool")
 from Log import Log
 
 class poolFromSinaApi(poolBase):
-    def __init__(self, dataGetter, isRealTime, recordSaver = None):
+    TRADEUNIT = 100
+    def __init__(self, dataGetter, isRealTime, recordSaver = None, isOpenLog = True):
         self.historyTradingList = []
         self.dataGetter = dataGetter
         self.isRealTime = isRealTime
         self.recordSaver = recordSaver
-        self.log = Log()
+        self.log = Log(isOpenLog)
     
     # 获取交易数据
     def get_market_trading_data(self, tradingUnitOrder):
@@ -40,6 +41,7 @@ class poolFromSinaApi(poolBase):
         return marketData
 
     def trade_order_sync(self, tradingUnitOrder):
+        self.log.info("trade order sync:" + str(tradingUnitOrder))
         if tradingUnitOrder.tradingType == tradingUnit.FIRST_PRICE_ORDER:
             succAmount, succMoney = self.trade_first_price_order(tradingUnitOrder)
         elif tradingUnitOrder.tradingType == tradingUnit.ALL_PRICE_ORDER:
@@ -67,20 +69,20 @@ class poolFromSinaApi(poolBase):
             self.log.info("order amount type:" + str(type(tradingUnitOrder.amount)))
             if tradingUnitOrder.amount < marketData.sellAmount[0]:
                 self.log.info("need less than sell 1")
-                succAmount = tradingUnitOrder.amount
+                succAmount = int(tradingUnitOrder.amount/100)*100
             else:
                 self.log.info("need more than sell 1")
-                succAmount = marketData.sellAmount[0]
+                succAmount = int(marketData.sellAmount[0]/100)*100
             succPrice = marketData.sellPrice[0]
             succMoney = succAmount * succPrice
         elif tradingUnitOrder.buysell == tradingUnit.SELL:
             self.log.info("sell")
             if tradingUnitOrder.amount < marketData.buyAmount[0]:
                 self.log.info("need less than buy 1")
-                succAmount = tradingUnitOrder.amount
+                succAmount = int(tradingUnitOrder.amount/100)*100
             else:
                 self.log.info("need more than buy 1")
-                succAmount = marketData.buyAmount[0]
+                succAmount = int(marketData.buyAmount[0]/100)*100
             succPrice = marketData.buyPrice[0]
             succMoney = succAmount * succPrice
         else:
@@ -99,10 +101,10 @@ class poolFromSinaApi(poolBase):
                 # 我的报价比卖一价格低
                 if tradingUnitOrder.amount < marketData.sellAmount[0]:
                     # 数量足够
-                    succAmount = tradingUnitOrder.amount
+                    succAmount = int(tradingUnitOrder.amount/100)*100
                 else:
                     # 数量不足
-                    succAmount = marketData.sellAmount[0]
+                    succAmount = int(marketData.sellAmount[0]/100)*100
                 succPrice = marketData.sellPrice[0]
             else:
                 succAmount = 0
@@ -111,9 +113,9 @@ class poolFromSinaApi(poolBase):
         elif tradingUnitOrder.buysell == tradingUnit.SELL:
             if tradingUnitOrder.expectPrice <= marketData.buyPrice[0]:
                 if tradingUnitOrder.amount < marketData.buyAmount[0]:
-                    succAmount = tradingUnitOrder.amount
+                    succAmount = int(tradingUnitOrder.amount/100)*100
                 else:
-                    succAmount = marketData.buyAmount[0]
+                    succAmount = int(marketData.buyAmount[0]/100)*100
                 succPrice = marketData.buyPrice[0]
             else:
                 succAmount = 0
@@ -144,12 +146,12 @@ class poolFromSinaApi(poolBase):
                 self.log.error("trading unit buysell error")
             # 若可买入/卖出的量大于nowleftAmount，则完成交易，否则向下查询买/卖家不断买入/卖出。
             if nowLeftAmount <= marketAmount:
-                nowTradingUnit.amount = nowLeftAmount
+                nowTradingUnit.amount = int(nowLeftAmount/100)*100
                 nowLeftAmount = 0
                 nowTradingList.append(nowTradingUnit)
                 break
             else:
-                nowTradingUnit.amount = marketAmount
+                nowTradingUnit.amount = int(marketAmount/100)*100
                 nowLeftAmount = nowLeftAmount - marketAmount
                 nowTradingList.append(nowTradingUnit)
 
@@ -157,6 +159,9 @@ class poolFromSinaApi(poolBase):
         succAmount = 0
         succMoney = 0
         for tmpUnit in nowTradingList:
+            self.log.info("amount type:" + str(tmpUnit.amount))
+            self.log.info("price type:" + str(tmpUnit.price))
+            self.log.info("succMoney type:" + str(tmpUnit.succMoney))
             succAmount = tmpUnit.amount + succAmount
             succMoney = tmpUnit.amount * tmpUnit.price + succMoney
         return succAmount, succMoney

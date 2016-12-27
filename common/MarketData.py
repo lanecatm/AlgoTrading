@@ -13,8 +13,8 @@ sys.path.append("../tool")
 from Log import Log
 class MarketData:
     # 这个类可能由数据库挖出的东西初始化,也可能用直接从爬下来的数据字符串数组初始化
-    def __init__(self, originArr):
-        self.log = Log()
+    def __init__(self, originArr, isOpenLog = False):
+        self.log = Log(isOpenLog)
         # TODO 添加stockId的传入
         # stockId int
         if isinstance(originArr[0], str):

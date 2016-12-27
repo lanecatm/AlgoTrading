@@ -43,6 +43,8 @@ class repoForAT:
             tradeTime ="NULL"
         else:
             tradeTime = "'" + orderInfo.tradeTime.strftime("%Y-%m-%d %H:%M:%S") + "'"
+        quantAnalysisDictStr = str(quantAnalysisDict).replace("'", "\'")
+
 
         statement = "INSERT INTO algotradingDB.client_orders values( NULL, "\
                 + str(orderInfo.stockId) + ", "\
@@ -53,7 +55,7 @@ class repoForAT:
                 + str(orderInfo.algChoice) + ", "\
                 + str(orderInfo.completedAmount) + ", "\
                 + str(orderInfo.status) + ", "\
-                + "'" + str(quantAnalysisDict) + "', "\
+                + "'" + quantAnalysisDictStr + "', "\
                 + str(orderInfo.processId) + ", "\
                 + str(updateTime) + ", "\
                 + str(nextUpdateTime) + ", "\
@@ -143,7 +145,8 @@ class repoForAT:
         if quantanalysis == None:
             return False
         status = clientOrder.INIT
-        statement = "UPDATE algotradingDB.client_orders SET QUANTANALYSIS = '" + str(quantanalysis) + "', "\
+        quantAnalysisDictStr = str(quantanalysis).replace("'", "\\'")
+        statement = "UPDATE algotradingDB.client_orders SET QUANTANALYSIS = '" + str(quantAnalysisDictStr) + "', "\
                 + "TRADETIME = NULL, "\
                 + "UPDATETIME = STARTTIME,"\
                 + "NEXTUPDATETIME = STARTTIME, "\
@@ -172,12 +175,12 @@ class repoForAT:
         if tradeTime == None:
             tradeTimeStr = "NULL"
         else:
-            tradeTimeStr = tradeTime.strftime("%Y-%m-%d %H:%M:%S")
+            tradeTimeStr = "'" + tradeTime.strftime("%Y-%m-%d %H:%M:%S") + "'"
 
         statement = "UPDATE algotradingDB.client_orders SET UPDATETIME = '" + updateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
                 + " NEXTUPDATETIME = '" + nextUpdateTime.strftime("%Y-%m-%d %H:%M:%S") + "', "\
                 + " UPDATEINTERVAL = " + str(timeInterval) + ", "\
-                + " TRADETIME = '" + tradeTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
+                + " TRADETIME = " + tradeTimeStr + " "\
                 + " WHERE ID = " + str(orderId)
         self.log.info("post_schedule statement : " + statement)
         self._mysql_cursor.execute(statement)
