@@ -17,8 +17,8 @@ class algoTrading:
     HIGH_INTERVAL_BOUND = 1000
     ZOOM = 2
 
-    def __init__(self, rat, pool, quantAnalysisEngineDict, findLastDays):
-        self.log = Log()
+    def __init__(self, rat, pool, quantAnalysisEngineDict, findLastDays, isOpenLog = True):
+        self.log = Log(isOpenLog)
         self.rat = rat
         self.pool = pool
         self.quantAnalysisEngineDict = quantAnalysisEngineDict
@@ -101,10 +101,13 @@ class algoTrading:
                 if timeWeight[0] == self.nowTime.strftime("%Y-%m-%d %H:%M:00"):
                     break
                 index = index + 1
+            if index >= len(sortedDict):
+                continue
             nextUpdateTimeIndex = index + order.updateTimeInterval
             self.log.info("index:" + str(index))
             self.log.info("update index:" + str(nextUpdateTimeIndex))
-            if nextUpdateTimeIndex >= len(sortedDict):
+            self.log.info("all index: " + str(len(sortedDict)))
+            if nextUpdateTimeIndex >= len(sortedDict) - 1:
                 self.log.info("final time point")
                 # 到了结束时间
                 order.nextUpdateTime = order.endTime
@@ -126,6 +129,7 @@ class algoTrading:
                 order.trdeTime = None
             else:
                 randomIndex, randomSeconds = self.random_trading_time(index, maxIndexNum)
+                self.log.info("random trade index:" + str(randomIndex))
                 order.tradeTime = datetime.datetime.strptime(sortedDict[randomIndex][0], "%Y-%m-%d %H:%M:%S")
                 self.log.info("trade time:" + str(order.tradeTime))
                 if order.tradeTime >= order.nextUpdateTime:

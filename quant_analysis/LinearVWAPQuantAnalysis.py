@@ -13,8 +13,8 @@ import numpy as np
 sys.path.append("../tool")
 from Log import Log
 class LinearVWAPQuantAnalysis(quantAnalysisBase):
-    def __init__(self, repoEngine):
-        self.log = Log()
+    def __init__(self, repoEngine, isOpenLog = True):
+        self.log = Log(isOpenLog)
         self.repoEngine = repoEngine
         return
 
@@ -27,6 +27,8 @@ class LinearVWAPQuantAnalysis(quantAnalysisBase):
     def get_recommend_order_weight(self, stockId, startTime, endTime, findLastDays):
         predictList, predictTime = self.get_history_data(stockId, startTime, endTime, findLastDays)
         weightUnit = []
+        actualFindLastDays = predictList.shape[0]
+        findLastDays = actualFindLastDays
         for i in range(findLastDays, 0, -1):
             weightUnit.append([i / ((1.0 + findLastDays) * findLastDays / 2.0)])
         self.log.info("weightUnit\n" + str(weightUnit))
