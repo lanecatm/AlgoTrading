@@ -40,6 +40,7 @@ class poolFromSinaApi(poolBase):
         return marketData
 
     def trade_order_sync(self, tradingUnitOrder):
+        self.log.info("trade order sync:" + str(tradingUnitOrder))
         if tradingUnitOrder.tradingType == tradingUnit.FIRST_PRICE_ORDER:
             succAmount, succMoney = self.trade_first_price_order(tradingUnitOrder)
         elif tradingUnitOrder.tradingType == tradingUnit.ALL_PRICE_ORDER:
@@ -157,6 +158,9 @@ class poolFromSinaApi(poolBase):
         succAmount = 0
         succMoney = 0
         for tmpUnit in nowTradingList:
+            self.log.info("amount type:" + str(tmpUnit.amount))
+            self.log.info("price type:" + str(tmpUnit.price))
+            self.log.info("succMoney type:" + str(tmpUnit.succMoney))
             succAmount = tmpUnit.amount + succAmount
             succMoney = tmpUnit.amount * tmpUnit.price + succMoney
         return succAmount, succMoney

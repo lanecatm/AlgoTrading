@@ -200,7 +200,7 @@ class repo:
 
         if len(data) > 0:
             self.log.info("return from repo info:" + str(data[0]))
-            return data[0][1:-1]
+            return data[0][0:-1]
         else:
             return []
 

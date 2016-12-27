@@ -12,11 +12,21 @@ import datetime
 from MarketData import MarketData
 import sys
 sys.path.append("../fetch_data/")
+from repo import repo
 from marketDataGetter import marketDataGetter
 
 if __name__=='__main__':
     market = marketDataGetter()
-    originArr = market.get_data()
+    originArr = market.get_data(600000)
+    marketData = MarketData(originArr)
+    print marketData.sellPrice
+    print marketData.sellAmount
+    print marketData.buyPrice
+    print marketData.buyAmount
+    print marketData.time
+
+    repoEngine = repo(isSqlite = False, isMysql = True, file_path = "", user = "algotrading", password = "12345678", ip = None, isOpenLog = False)
+    originArr = repoEngine.get_data(600000, datetime.datetime(2016, 12,23,10))
     marketData = MarketData(originArr)
     print marketData.sellPrice
     print marketData.sellAmount

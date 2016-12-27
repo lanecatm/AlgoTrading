@@ -15,5 +15,5 @@ sys.path.append("../tool")
 from Log import Log
 
 
-sqliteRepo = repo(True, True, "again_2.db", "algotrading", "12345678", None)
+sqliteRepo = repo(True, True, "again_2_half.db", "algotrading", "12345678", None)
 sqliteRepo.change_data_into_mysql()

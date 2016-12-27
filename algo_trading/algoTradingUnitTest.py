@@ -10,7 +10,7 @@ import sys
 import time
 import datetime
 import unittest
-from algoTrading import AlgoTrading
+from algoTrading import algoTrading
 sys.path.append("../common")
 from clientOrder import clientOrder
 from tradingUnit import tradingUnit
@@ -239,7 +239,7 @@ class algoTradingUnitTest(unittest.TestCase):
         quantAnalysisDict[clientOrder.TWAP] = self.quantAnalysisTWAP
         quantAnalysisDict[clientOrder.VWAP] = self.quantAnalysisVWAP
         quantAnalysisDict[clientOrder.LINEARVWAP] = self.quantAnalysisLinearVWAP
-        at = AlgoTrading(self.rat, self.pool, quantAnalysisDict, findLastdays)
+        at = algoTrading(self.rat, self.pool, quantAnalysisDict, findLastdays)
         return at
 
     def refresh(self):

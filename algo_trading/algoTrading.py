@@ -1,29 +1,17 @@
 # -*- encoding:utf-8 -*-
 import sys
-#sys.path.append("../cli/")
+import datetime
+import random
+
 sys.path.append("../common/")
 import clientOrder
-import orderResult
 from tradingUnit import tradingUnit
 
-sys.path.append("../quant_analysis")
-from TWAPQuantAnalysis import TWAPQuantAnalysis
-from VWAPQuantAnalysis import VWAPQuantAnalysis
-
-sys.path.append("../pool")
-from poolFromSinaApi import poolFromSinaApi
-
-sys.path.append("../fetch_data")
-from marketDataGetter import marketDataGetter
 sys.path.append("../tool")
 from Log import Log
 
-import datetime
-import random
-import time
-from repoForAT import repoForAT
 
-class AlgoTrading:
+class algoTrading:
     TRADE_UNIT = 100
     LOW_INTERVAL_BOUND = 200
     HIGH_INTERVAL_BOUND = 1000
@@ -83,6 +71,8 @@ class AlgoTrading:
                 succTradingUnit = self.pool.trade_order_sync(unit)
                 succAmount = succTradingUnit.succAmount
                 succMoney = succTradingUnit.succMoney
+                self.log.info("trade succ amount: " + str(succAmount))
+                self.log.info("trade succ money: " + str(succMoney))
             else:
                 amount = int((order.stockAmount - order.completedAmount)/self.TRADE_UNIT) * self.TRADE_UNIT
                 self.log.info("calculated amount:" + str(amount))
@@ -90,6 +80,8 @@ class AlgoTrading:
                 succTradingUnit = self.pool.trade_order_sync(unit)
                 succAmount = succTradingUnit.succAmount
                 succMoney = succTradingUnit.succMoney
+                self.log.info("trade succ amount: " + str(succAmount))
+                self.log.info("trade succ money: " + str(succMoney))
             self.rat.post_trade(order.orderId, order.completedAmount + succAmount, order.trunOver + succMoney)
 
 
@@ -121,16 +113,23 @@ class AlgoTrading:
                 aboutToTrade = order.stockAmount - order.completedAmount
                 actualEndTime = datetime.datetime.strptime(sortedDict[-1][0], "%Y-%m-%d %H:%M:%S")
                 order.updateTimeInterval = (actualEndTime - order.updateTime).seconds / 60
+                maxIndexNum = len(sortedDict) - index
             else:
                 order.nextUpdateTime = datetime.datetime.strptime(sortedDict[nextUpdateTimeIndex][0], "%Y-%m-%d %H:%M:%S")
                 weight = sortedDict[nextUpdateTimeIndex][1]
                 aboutToTrade = weight * order.stockAmount - order.completedAmount
+                maxIndexNum = order.updateTimeInterval
+
             self.log.info("about to trade : " + str(aboutToTrade))
             # D
             if aboutToTrade < self.TRADE_UNIT:
                 order.trdeTime = None
             else:
-                order.tradeTime = self.random_trading_time(order.updateTime, order.updateTimeInterval)
+                randomIndex, randomSeconds = self.random_trading_time(index, maxIndexNum)
+                order.tradeTime = datetime.datetime.strptime(sortedDict[randomIndex][0], "%Y-%m-%d %H:%M:%S")
+                self.log.info("trade time:" + str(order.tradeTime))
+                if order.tradeTime >= order.nextUpdateTime:
+                    self.log.error("trade time > nextUpdateTime " + str(order.tradeTime) + ", " + str(order.nextUpdateTime))
             # C
             if aboutToTrade <= self.LOW_INTERVAL_BOUND:
                 self.log.info("increase interval")
@@ -148,9 +147,9 @@ class AlgoTrading:
         return t - datetime.timedelta(seconds = t.second) - datetime.timedelta(microseconds = t.microsecond)
 
     # return tradingTime
-    def random_trading_time(self, updateTime, updateTimeInterval):
-        randomSeconds = int(random.random() * 60 *updateTimeInterval)
-        return updateTime + datetime.timedelta(seconds = randomSeconds)
+    # TODO 修改random
+    def random_trading_time(self, startIndex, maxIndex):
+        return startIndex + int(random.random() * maxIndex), int(random.random()*60)
 
 
  

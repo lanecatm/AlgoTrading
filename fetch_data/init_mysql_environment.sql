@@ -1,6 +1,6 @@
 drop database if exists algotradingDB; 
 create database algotradingDB;
-grant all privileges on algotradingDB.* to algotrading@"%" identified by "12345678";
+grant all privileges on algotradingDB.* to "algotrading"@"%" identified by "12345678";
 flush privileges;
 use algotradingDB;
 drop table if exists history_stock_info;
