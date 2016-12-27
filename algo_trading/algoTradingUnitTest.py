@@ -276,15 +276,6 @@ class algoTradingUnitTest(unittest.TestCase):
         self.assertEquals(newTime1, newTime2)
         self.assertEquals(type(time1), type(newTime1))
 
-    def test_random_trading_time(self):
-        algoTradingEngine = self.new_algoTrading()
-        time1 = datetime.datetime(2016, 12, 12, 1, 34, 22)
-        time2 = datetime.datetime(2016, 12, 12, 1, 38, 00)
-        for i in range(1000):
-            randomTime = algoTradingEngine.random_trading_time(time1, 10)
-            self.assertLessEqual(time1, randomTime)
-            self.assertGreater(time1 + datetime.timedelta(minutes = 10), randomTime)
-            #self.log.info("random time:" + str(randomTime))
 
     def test_set_time(self):
         algoTradingEngine = self.new_algoTrading()
