@@ -76,6 +76,22 @@ class repoForAT:
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
 
+    # 寻找所有单子
+    # return list<clientOrder>
+    def extract_all_orders(self):
+        ansList = []
+        statement = "SELECT * FROM algotradingDB.client_orders"
+        self.log.info("extract_all_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
+        for dataUnit in data:
+            clientOrderUnit = clientOrder()
+            clientOrderUnit.create_order_by_sql_list(dataUnit)
+            ansList.append(clientOrderUnit)
+        return ansList
+
+
+
     # 寻找没有量化分析的单号
     # return list<clientOrder>
     def extract_uninit_orders(self):
