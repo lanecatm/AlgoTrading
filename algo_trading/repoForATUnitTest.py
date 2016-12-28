@@ -50,6 +50,14 @@ class repoForATUnitTest(unittest.TestCase):
         repo.insert_order(orderInfo)
         repo.delete_order(1)
 
+    def test_delete_all_orders(self):
+        repo = repoForAT("algotrading", "12345678", None)
+        orderInfo = self.new_order()
+        repo.insert_order(orderInfo)
+        repo.insert_order(orderInfo)
+        repo.delete_all_orders()
+
+
     def test_extract_uninit_order(self):
         repo = repoForAT("algotrading", "12345678", None)
         originList = repo.extract_uninit_orders()
