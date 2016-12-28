@@ -127,19 +127,32 @@ class chartCreater():
         else:
             print dataArray[0].shape[0] , len(predictTimeList)
 
+        print "vwap tmp:", self.get_history_TWAP(stockId, startTime, endTime)
+
         figHelper.save()
         figHelper.finish()
         return
 
     def get_history_TWAP(self, stockId, startTime, endTime):
-        return
+        quantAnalysisGetter = VWAPQuantAnalysis(self.historyRepo)
+        startTime = tradingRecordList[0].time
+        endTime = tradingRecordList[-1].time
+        stockId = tradingRecordList[0].stockId
+        dataArray, timeArray = quantAnalysisGetter.get_history_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
+        amountArray = dataArray / np.sum(dataArray[0], dtype = np.float)
+        percentageArray = percentageArray[0]
+        priceArray, timeArray = quantAnalysisGetter.get_price_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
+        priceArray = priceArray[0]
+        VWAPvalue = percentageArray * priceArray
+
+        return VWAPvalue
 
 if __name__=="__main__":
     historyRepo = repo(False, True, None, "algotrading", "12345678", None, False)
     clientOrderRepo = repoForAT("algotrading", "12345678", None)
     tradingRepo = tradingRecordSaver("algotrading", "12345678", None)
     chart = chartCreater(historyRepo, clientOrderRepo, tradingRepo)
-    chart.get_chart(4)
+    #chart.get_chart(4)
     chart.get_bar(4)
 
 

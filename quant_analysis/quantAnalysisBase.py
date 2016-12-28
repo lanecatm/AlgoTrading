@@ -115,6 +115,55 @@ class quantAnalysisBase:
         self.log.info(str(predictTimeList))
         return predictList, predictTimeList
 
+    def get_price_data(self, stockId, startTime, endTime, findLastDays):
+        self.log.info("get history data " + str(stockId) +  "start time: " + startTime.isoformat() + " end time: " + endTime.isoformat())
+        # 获取历史数据
+        historyDataList = []
+        historyTimeList = []
+        predictList = []
+        predictTimeList = []
+        # 取多少天平均
+        # 要加上非工作日的时间
+        n = datetime.timedelta(days=findLastDays)
+        # 下单开始和结束的时间差
+        delta = (endTime.date() - startTime.date()).days
+        self.log.info("days:" + str(delta))
+        # 向数据库请求开始的日子
+        startDate = startTime.date() - datetime.timedelta(days = 1 + delta)
+        # 向数据库请求结束的日子
+        endDate = startDate - n
+        if delta == 0:   
+            # 在一天内部
+            historyData, historyTime = self.repoEngine.get_price(stockId, startDate, endDate, startTime.time(), endTime.time())
+            historyDataList.append(historyData)
+            historyTimeList.append(historyTime)
+        else:  
+            # 多于一天
+            historyData, historyTime = self.repoEngine.get_price(stockId, startDate, endDate, startTime.time(), self.stockEndTime.time())
+            historyDataList.append(historyData)
+            historyTimeList.append(historyTime)
+            for i in range(delta - 1):
+                startDate = startDate + datetime.timedelta(days = 1)
+                endDate = endDate + datetime.timedelta(days = 1)
+                historyData, historyTime = self.repoEngine.get_price(stockId, startDate, endDate, self.stockStartTime.time(), self.stockEndTime.time())
+                historyDataList.append(historyData)
+                historyTimeList.append(historyTime)
+            startDate = startDate + datetime.timedelta(days = 1)
+            endDate = endDate + datetime.timedelta(days = 1)
+            historyData, historyTime = self.repoEngine.get_price(stockId, startDate, endDate, self.stockStartTime.time(), endTime.time())
+            historyDataList.append(historyData)
+            historyTimeList.append(historyTime)
+        
+        # 把列表拼接起来
+        predictList = historyDataList[0]
+        predictTimeList = historyTimeList[0]
+        for i in range(1, len(historyDataList)):
+            predictList = np.hstack((predictList,historyDataList[i]))
+            predictTimeList = np.hstack((predictTimeList, historyTimeList[i]))
+        self.log.info(str(predictList))
+        self.log.info(str(predictTimeList))
+        return predictList, predictTimeList
+
     # 分析历史数据
     def analysis_history_data(self):
         abstract()
