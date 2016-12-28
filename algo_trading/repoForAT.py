@@ -84,6 +84,14 @@ class repoForAT:
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
 
+
+    def delete_all_orders(self):
+        statement = "TRUNCATE TABLE algotradingDB.client_orders"
+        self.log.info("delete_all_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        self._mysql_db.commit()
+
+
     # 寻找所有单子
     # return list<clientOrder>
     def extract_all_orders(self):
@@ -200,7 +208,7 @@ class repoForAT:
     def post_trade(self, orderId, completed_amount, turnover):
         statement = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount)\
                 + ", TURNOVER = " + str(turnover)\
-                + ", AVGPRICE = " + str(turnover/completed_amount)\
+                + ", AVGPRICE = " + str(0)\
                 + ", TRADETIME = NULL "\
                 + " WHERE ID = " + str(orderId)
         self.log.info("finish trade statement : " + statement)
