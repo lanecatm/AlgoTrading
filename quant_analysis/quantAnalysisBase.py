@@ -25,7 +25,6 @@ class quantAnalysisBase:
 
     def __init__(self):
         self.log = Log()
-        abstract()
         return
 
     # param weightArray np.array [percentage1, percentage2, ..., percentagen]

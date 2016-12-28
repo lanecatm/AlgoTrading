@@ -54,7 +54,7 @@ class tradingRecordSaver:
         if orderId == None:
             statement = "SELECT * FROM algotradingDB.outside_pool_record"
         else:
-            statement = "SELECT * FROM algotradingDB.outside_pool_record WHERE ORDERID = " + str(orderId)
+            statement = "SELECT * FROM algotradingDB.outside_pool_record WHERE TRADINGID = " + str(orderId)
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
         tradingRecordList = []

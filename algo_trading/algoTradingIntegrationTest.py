@@ -62,7 +62,7 @@ def test_history_pool():
     log.info("init succ")
 
     order1 = clientOrder()
-    stockId = 600000
+    stockId = 601377
     startTime = datetime.datetime(2016, 12, 23, 10, 00)
     endTime = datetime.datetime(2016, 12, 23, 14, 00)
     stockAmount = 10000

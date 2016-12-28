@@ -1,6 +1,14 @@
 # -*- encoding:utf-8 -*-
+
+# ==============================================================================
+# Filename: repoForAT.py
+# Author: Xiaofu Huang
+# E-mail: lanecatm@sjtu.edu.cn
+# Last modified: 2016-12-24 16:24
+# Description: algotrading 访问数据库repo
+# ==============================================================================
+
 import sys, os
-import sqlite3
 import MySQLdb
 import time
 import datetime
@@ -90,6 +98,19 @@ class repoForAT:
             ansList.append(clientOrderUnit)
         return ansList
 
+    # 寻找一个单子
+    # return clientOrder
+    def extract_one_order(self, orderId):
+        ansList = []
+        statement = "SELECT * FROM algotradingDB.client_orders where id = " + str(orderId)
+        self.log.info("extract_all_orders statement : " + statement)
+        self._mysql_cursor.execute(statement)
+        data = self._mysql_cursor.fetchall()
+        if len(data) == 0:
+            return None
+        clientOrderUnit = clientOrder()
+        clientOrderUnit.create_order_by_sql_list(data[0])
+        return clientOrderUnit
 
 
     # 寻找没有量化分析的单号
