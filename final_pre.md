@@ -40,27 +40,46 @@ AlgoTrading
     ├── FileUtility.py
     └── Log.py
 ```
-![asdf](./architecture.png)
+![architecture](./architecture_rev1.0.png)
 
 ## Challenges & Solutions
 - Data feed
-  * crawl market data
-  * sqlite to MySQL
+  - crawl market data:
+    - SinaAPI
+    - 600000 601006 601377
+- Volume Prediction
+  - Simple Moving Average
+  - Linear Weighted Moving Average
 - Trading Strategy
+  - Frequency Auto-adjustment Inspired by Congestion avoidance
+    - Exponential growth / fall
 
 ## Features
 - Volume/Price Prediction
+  - Simple Moving Average
+  - Linear Weighted Moving Average
 - Active Trading Strategy / Frequency adjusts
 - Both market order and limit order supported
 - Realtime Pool / Back-test Pool / (Internal Pool)
 - Data feed
 - Monitor
 - GUI & CLI
-- Unit Tests
+- High code coverage of test
 - Informative Log
 
 # Demo (10 min)
 1. GUI
 2. Start algoTrading
 3. Place purchase order
-4. Execute order
+   1. time: 2016-12-19/23   不超过25
+   2. 必有可交易时间段
+4. Show place orders
+5. Delete orders
+6. Execute order
+7. Monitor
+   1. trade records
+   2. graph
+8. Show the results
+9. Run all unit tests
+10. Show the log files
+
