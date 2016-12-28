@@ -34,9 +34,17 @@ from tradingRecordSaver import tradingRecordSaver
 sys.path.append("../fetch_data")
 from marketDataGetter import marketDataGetter
 from repo import repo
+import multiprocessing
 
 
 log = Log()
+class runHistory(multiprocessing.Process):
+    def __init__(self, interval):
+        multiprocessing.Process.__init__(self)
+        self.interval = interval
+
+
+
 def history_pool(startTime, endTime, findLastDays = 7, isOpenLog = False):
 
     # 初始化algotrading的repo

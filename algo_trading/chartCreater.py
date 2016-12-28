@@ -47,7 +47,7 @@ class chartCreater():
             timeList.append(datetime.datetime.strptime(timePercantage[0], "%Y-%m-%d %H:%M:%S"))
             valueList.append(timePercantage[1])
         figHelper.draw_plot_fig(valueList, timeList, color='r', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading percentage", label = "predicted", linestyle = "-", rotation = True)
-        predictTimeList = timeList
+        predictTimeList = timeList[:]
 
         percentageList = []
         timeList = []
@@ -61,9 +61,16 @@ class chartCreater():
         figHelper.draw_plot_fig(percentageList, timeList, color='b', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading percentage", label = "actual", linestyle = "-", rotation = True)
 
         quantAnalysisGetter = VWAPQuantAnalysis(self.historyRepo)
-        startTime = tradingRecordList[0].time
-        endTime = tradingRecordList[-1].time
+        startTime = datetime.datetime.strptime(sortedDict[0][0], "%Y-%m-%d %H:%M:%S")
+        endTime = datetime.datetime.strptime(sortedDict[-1][0], "%Y-%m-%d %H:%M:%S")
+        #endTime = tradingRecordList[-1].time
         stockId = tradingRecordList[0].stockId
+
+
+        vwapTmp, TWAPvalue = self.get_history_TWAP(stockId, startTime, endTime)
+        print "vwap tmp:", vwapTmp
+        print "twap tmp:", TWAPvalue
+
         dataArray, timeArray = quantAnalysisGetter.get_history_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
         dataArray = dataArray / np.sum(dataArray[0], dtype = np.float)
         dataList = []
@@ -71,9 +78,12 @@ class chartCreater():
             dataList.append(np.sum(dataArray[0][0:i + 1]))
         print dataList
         if dataArray[0].shape[0] == len(predictTimeList):
-            figHelper.draw_plot_fig(dataList, predictTimeList, color='g', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading percentage", label = "expect", linestyle = "--", rotation = True)
+            figHelper.draw_plot_fig(dataList, predictTimeList, color='g', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading VWAP Price: " + str(vwapTmp) + ", TWAP Price:" + str(TWAPvalue), label = "expect", linestyle = "--", rotation = True)
         else:
             print dataArray[0].shape[0] , len(predictTimeList)
+            print str(dataArray[0])
+            print str(predictTimeList)
+            print str(timeArray)
 
         figHelper.save()
         figHelper.finish()
@@ -117,17 +127,26 @@ class chartCreater():
         figHelper.draw_plot_fig(valueList, timeList, color='r', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading percentage", label = "predicted", linestyle = "-", rotation = True)
 
         quantAnalysisGetter = VWAPQuantAnalysis(self.historyRepo)
-        startTime = tradingRecordList[0].time
-        endTime = tradingRecordList[-1].time
+        startTime = datetime.datetime.strptime(sortedDict[0][0], "%Y-%m-%d %H:%M:%S")
+        endTime = datetime.datetime.strptime(sortedDict[-1][0], "%Y-%m-%d %H:%M:%S")
+        #startTime = tradingRecordList[0].time
+        #endTime = tradingRecordList[-1].time
         stockId = tradingRecordList[0].stockId
+
+        vwapTmp, TWAPvalue = self.get_history_TWAP(stockId, startTime, endTime)
+        print "vwap actual:", vwapTmp
+        print "twap actual:", TWAPvalue
+        
         dataArray, timeArray = quantAnalysisGetter.get_history_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
         dataArray = dataArray / np.sum(dataArray[0], dtype = np.float)
         if dataArray[0].shape[0] == len(predictTimeList):
-            figHelper.draw_plot_fig(dataArray[0].tolist(), predictTimeList, color='g', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading percentage", label = "expect", linestyle = "--", rotation = True)
+            figHelper.draw_plot_fig(dataArray[0].tolist(), predictTimeList, color='g', xLabel = "", yLabel = "percentage", title = "order " + str(orderId) + " trading, VWAP Price:" + str(vwapTmp) + ", TWAP Price:" + str(TWAPvalue), label = "expect", linestyle = "--", rotation = True)
         else:
             print dataArray[0].shape[0] , len(predictTimeList)
+            print str(dataArray[0])
+            print str(predictTimeList)
+            print str(timeArray)
 
-        print "vwap tmp:", self.get_history_TWAP(stockId, startTime, endTime)
 
         figHelper.save()
         figHelper.finish()
@@ -135,24 +154,22 @@ class chartCreater():
 
     def get_history_TWAP(self, stockId, startTime, endTime):
         quantAnalysisGetter = VWAPQuantAnalysis(self.historyRepo)
-        startTime = tradingRecordList[0].time
-        endTime = tradingRecordList[-1].time
-        stockId = tradingRecordList[0].stockId
         dataArray, timeArray = quantAnalysisGetter.get_history_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
         amountArray = dataArray / np.sum(dataArray[0], dtype = np.float)
-        percentageArray = percentageArray[0]
+        percentageArray = amountArray[0]
         priceArray, timeArray = quantAnalysisGetter.get_price_data(stockId,startTime, endTime + datetime.timedelta(minutes = 1), 7)
         priceArray = priceArray[0]
         VWAPvalue = percentageArray * priceArray
+        TWAPvalue = np.sum(priceArray) / priceArray.shape[0]
 
-        return VWAPvalue
+        return np.sum(VWAPvalue), TWAPvalue
 
 if __name__=="__main__":
     historyRepo = repo(False, True, None, "algotrading", "12345678", None, False)
-    clientOrderRepo = repoForAT("algotrading", "12345678", None)
-    tradingRepo = tradingRecordSaver("algotrading", "12345678", None)
+    clientOrderRepo = repoForAT("algotrading", "12345678", None, False)
+    tradingRepo = tradingRecordSaver("algotrading", "12345678", None, False)
     chart = chartCreater(historyRepo, clientOrderRepo, tradingRepo)
-    #chart.get_chart(4)
-    chart.get_bar(4)
+    chart.get_chart(20)
+    chart.get_bar(20)
 
 

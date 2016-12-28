@@ -26,10 +26,8 @@ class repoForAT:
             self._mysql_db = MySQLdb.connect("localhost", user, password, "algotradingDB")
         else:
             self._mysql_db = MySQLdb.connect(ip, user, password, "algotradingDB")
-        self._mysql_cursor = self._mysql_db.cursor()
 
     def __del__(self):
-        self._mysql_cursor.close()
         self._mysql_db.close()
 
     # 新增一个order
@@ -73,23 +71,29 @@ class repoForAT:
                 + str(orderInfo.trunOver) + ", "\
                 + str(orderInfo.avgPrice) + ")"
         self.log.info("insert statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
     # 删除指定单号的订单
     # param orderId int
     def delete_order(self, orderId):
         statement = "DELETE FROM algotradingDB.client_orders WHERE ID = " + str(orderId)
         self.log.info("delete_order statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
 
     def delete_all_orders(self):
         statement = "TRUNCATE TABLE algotradingDB.client_orders"
         self.log.info("delete_all_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
 
     # 寻找所有单子
@@ -98,8 +102,10 @@ class repoForAT:
         ansList = []
         statement = "SELECT * FROM algotradingDB.client_orders"
         self.log.info("extract_all_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -112,8 +118,10 @@ class repoForAT:
         ansList = []
         statement = "SELECT * FROM algotradingDB.client_orders where id = " + str(orderId)
         self.log.info("extract_all_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         if len(data) == 0:
             return None
         clientOrderUnit = clientOrder()
@@ -127,8 +135,10 @@ class repoForAT:
         ansList = []
         statement = "SELECT * FROM algotradingDB.client_orders WHERE STATUS = " + str(clientOrder.UNINIT)
         self.log.info("extract_uninit_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -143,8 +153,10 @@ class repoForAT:
         statement = "SELECT * FROM algotradingDB.client_orders WHERE TRADETIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
                 + " AND STATUS = " + str(clientOrder.INIT)
         self.log.info("extract_trading_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -158,8 +170,10 @@ class repoForAT:
         statement = "SELECT * FROM algotradingDB.client_orders WHERE NEXTUPDATETIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
                 + " AND STATUS = " + str(clientOrder.INIT)
         self.log.info("extract_refresh_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -172,8 +186,10 @@ class repoForAT:
         statement = "SELECT * FROM algotradingDB.client_orders WHERE ENDTIME <= '" + nowTime.strftime("%Y-%m-%d %H:%M:%S") + "'"\
                 + " AND STATUS = " + str(clientOrder.INIT)
         self.log.info("extract_completed_orders statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         data = self._mysql_cursor.fetchall()
+        self._mysql_cursor.close()
         for dataUnit in data:
             clientOrderUnit = clientOrder()
             clientOrderUnit.create_order_by_sql_list(dataUnit)
@@ -199,8 +215,10 @@ class repoForAT:
                 + "STATUS = " + str(status) + " "\
                 + "WHERE ID = " + str(orderId)
         self.log.info("save_qa_result statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
         return True
 
     # 完成一次交易
@@ -208,12 +226,14 @@ class repoForAT:
     def post_trade(self, orderId, completed_amount, turnover):
         statement = "UPDATE algotradingDB.client_orders SET COMPLETEDAMOUNT = " + str(completed_amount)\
                 + ", TURNOVER = " + str(turnover)\
-                + ", AVGPRICE = " + str(0)\
+                + ", AVGPRICE = " + str(turnover / completed_amount)\
                 + ", TRADETIME = NULL "\
                 + " WHERE ID = " + str(orderId)
         self.log.info("finish trade statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
     # 更新
     def post_schedule(self, orderId, updateTime, nextUpdateTime, timeInterval, tradeTime):
@@ -228,16 +248,20 @@ class repoForAT:
                 + " TRADETIME = " + tradeTimeStr + " "\
                 + " WHERE ID = " + str(orderId)
         self.log.info("post_schedule statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
     # 终结整个交易单
     def complete_trade(self, orderId):
         statement = "UPDATE algotradingDB.client_orders SET STATUS = " + str(clientOrder.COMPLETED)\
                 + " WHERE ID = " + str(orderId)
         self.log.info("complete_trade statement : " + statement)
+        self._mysql_cursor = self._mysql_db.cursor()
         self._mysql_cursor.execute(statement)
         self._mysql_db.commit()
+        self._mysql_cursor.close()
 
 
 
