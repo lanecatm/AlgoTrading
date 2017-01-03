@@ -183,7 +183,7 @@ class TestWindow(QtGui.QWidget):
         self.layout.addWidget(self.stockAmountButton,3,6)
         
         self.stockAmountEdit = QtGui.QSpinBox()
-        self.stockAmountEdit.setRange(0,10000)
+        self.stockAmountEdit.setRange(0,1000000000)
         self.layout.addWidget(self.stockAmountEdit,3,7)
         
         """--------------------------操作类型定义--------------------------"""
@@ -431,11 +431,24 @@ class TestWindow(QtGui.QWidget):
 
         
     def emptyOrderFun(self):
-        """
-            黄晓芙 在这里！！！
-            """
-        pass
-    
+        print "empty order"
+        repoAT = repoForAT('algotrading', '12345678', None, False)
+        orderList = repoAT.extract_all_orders()
+        allRow = len(orderList)
+        repoAT.delete_all_orders()
+        for rowIndex in range(1, allRow + 1):
+            self.clearInputTable(rowIndex)
+            rowIndex = rowIndex + 1
+        return
+    def clearInputTable(self, rownumber):
+        self.inputTableLabel.setItem(rownumber,0, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,1, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,2, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,3, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,4, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,5, QtGui.QTableWidgetItem(""))
+        self.inputTableLabel.setItem(rownumber,6, QtGui.QTableWidgetItem(""))
+
     # rowNumber from 1
     def fillInputTable(self, order, rownumber):
         self.inputTableLabel.setItem(rownumber,0, QtGui.QTableWidgetItem(str(order.orderId)))

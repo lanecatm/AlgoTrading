@@ -36,19 +36,19 @@ class poolFromSinaApiUnitTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_get_market_trading_data_realtime(self):
-        dataGetter = marketDataGetter() 
-        pool = poolFromSinaApi(dataGetter, True)
-        tradingUnitId = 1
-        stockId = 600000
-        time = datetime.datetime.strptime("2016-12-16 10:00:00" , "%Y-%m-%d %H:%M:%S")
-        buysell = tradingUnit.BUY
-        isSync = True
-        tradingType = tradingUnit.ALL_PRICE_ORDER 
-        amount = 1000
-        testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount)
-        marketData = pool.get_market_trading_data(testTradingUnit)
-        self.log.info("final market data: " + str(marketData))
+    #def test_get_market_trading_data_realtime(self):
+    #    dataGetter = marketDataGetter() 
+    #    pool = poolFromSinaApi(dataGetter, True)
+    #    tradingUnitId = 1
+    #    stockId = 600000
+    #    time = datetime.datetime.strptime("2016-12-16 10:00:00" , "%Y-%m-%d %H:%M:%S")
+    #    buysell = tradingUnit.BUY
+    #    isSync = True
+    #    tradingType = tradingUnit.ALL_PRICE_ORDER 
+    #    amount = 1000
+    #    testTradingUnit = tradingUnit(tradingUnitId, stockId, time, buysell, isSync, tradingType, amount)
+    #    marketData = pool.get_market_trading_data(testTradingUnit)
+    #    self.log.info("final market data: " + str(marketData))
 
     def test_get_market_trading_data_not_realtime(self):
         dataGetter = repo(False, True , None, "algotrading", "12345678", None)
